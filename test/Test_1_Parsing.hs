@@ -240,19 +240,9 @@ parseCrazyQuoteCombo = testCase
   "\n Test 1.14 - Parsing a crazy quote combo. \n\
   \ One final test to see that quote expansion works" $ do
 
-  let input    = "'(this ''''(makes ''no) 'sense)"
-      expected =
-        ParsedList [ ParsedString "quote"
-                   , ParsedList [ ParsedString "quote"
-                                , ParsedList [ ParsedString "quote"
-                                             , ParsedList [ ParsedString "quote"
-                                                          , ParsedString "foo"
-                                                          ]
-                                             ]
-                                ]
-                   ]
+  let input = "'(this ''''(makes ''no) 'sense)"
 
-  assertEqual ("parse " ++ input) expected $ parse input
+  assertEqual ("unparse $ parse " ++ input) input . unparse $ parse input
 
 
 parsingTests :: TestTree
