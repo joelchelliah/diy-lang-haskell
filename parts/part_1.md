@@ -60,23 +60,23 @@ ParsedList [ ParsedSymbol "define"
 #### The AST is created as follows
 
 - Comments are removed.
-- Each type of atom is then represented as a sub type of the data type `Parsed`.
-- Symbols are represented as `ParsedSymbol String`.
+- Each type of atom is then represented as a sub type of the `Parsed` data type.
+- Symbols are represented as `ParsedSymbol :: String -> Parsed`.
     + `"foo"` parses to:
     ```haskell
       ParsedSymbol "foo"
     ```
-- The special symbols `#t` and `#f` are represented as `ParsedBool Bool`.
+- The special symbols `#t` and `#f` are represented as `ParsedBool :: Bool -> Parsed`.
     + `"#t"` parses to:
     ```haskell
       ParsedBool True
     ```
-- Integers are represented as `ParsedInt Int`.
-    + `"42"` parses:
+- Integers are represented as `ParsedInt :: Int -> Parsed`.
+    + `"42"` parses to:
     ```haskell
       ParsedInt 42
     ```
-- List expressions are represented as `ParsedList [Parsed]`.
+- List expressions are represented as `ParsedList :: [Parsed] -> Parsed`.
     + `"(foo #f 100)"` parses to:
     ```haskell
       ParsedList [ ParsedSymbol "foo"
@@ -103,15 +103,15 @@ ParsedList [ ParsedSymbol "define"
 
 ## Your turn
 
-The parsing is done in `Parser.hs`. Here, it is your job to implement the function:
+The parsing is done in `Parser.hs`. Here, you will be implementing the following function:
 ```haskell
 parse :: String -> Parsed
 ```
-A lot of the gritty work of counting parentheses and such has already been done for you in `ParserUtil.hs`, but you must stitch everything together.
+A lot of the gritty work of counting parentheses and such has already been done for you in `ParserUtil.hs`, but you must still stitch everything together.
 
 - Have a look at the provided functions in `util/ParserUtil.hs` before you start. These should prove useful.
 
-- Run the tests with the following command: `stack test`, and hack away until the all tests are passing.
+- Run the tests with the following command: `stack test`, and hack away until the all the tests are passing.
 
 - Each test has a description, which you should probably read it if you get stuck.
 
