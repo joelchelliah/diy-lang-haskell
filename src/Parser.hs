@@ -1,30 +1,20 @@
-module Parser ( Parsed(..)
-              , ParseErrorType(..)
-              , parse, unparse, parseMultiple
-              ) where
+module Parser ( parse, unparse, parseMultiple ) where
 
 import           Data.Char  (isDigit)
 import           ParserUtil
+import           Types
+
 
 -- This is the Parser module, with the `parse` function which you'll
 -- implement as <part 1> of the workshop. Its job is to convert strings
 -- into data structures that the evaluator can understand.
-
-
--- The types we will be using to represent the different parts
--- of our AST. You shouldn't need to define any other types.
-data Parsed = ParsedSymbol String
-            | ParsedBool Bool
-            | ParsedInt Int
-            | ParsedList [Parsed]
-            | ParsedQuote Parsed
-            | ParseError ParseErrorType
-            deriving (Show, Eq)
-
--- Possible parser errors types.
-data ParseErrorType = IncompleteExpression
-                    | ExpressionTooLarge
-                    deriving (Show, Eq)
+--
+-- Tips:
+--  * A few helpful utility functions, to help you along the
+--    way, can be found in `util/ParserUtil.hs`.
+--
+--  * The types we will be using to represent our AST can be
+--    found in `src/Types.hs`.
 
 
 ----------------------------------------------------------------
@@ -36,9 +26,6 @@ data ParseErrorType = IncompleteExpression
 parse :: String -> Parsed
 parse source =
   ParsedSymbol "Implement this function!"
-
-  -- Tip: A few userful utility functions, to help you along the
-  --      way, can be found in `util/ParserUtil.hs`.
 
 
 
@@ -63,11 +50,11 @@ parseMultiple source =
 
 -- Turns a Parsed AST back into a string representation.
 unparse :: Parsed -> String
-unparse (ParsedSymbol string)             = string
-unparse (ParsedBool True)                 = "#t"
-unparse (ParsedBool False)                = "#f"
-unparse (ParsedInt int)                   = show int
-unparse (ParsedList exps)                 = "(" ++ unwords (unparse <$> exps) ++ ")"
-unparse (ParsedQuote exp)                 = "'" ++ unparse exp
-unparse (ParseError IncompleteExpression) = "Error: Incomplete expression!"
-unparse (ParseError ExpressionTooLarge)   = "Error: Expression too large!"
+unparse (ParsedSymbol string)                    = string
+unparse (ParsedBool True)                        = "#t"
+unparse (ParsedBool False)                       = "#f"
+unparse (ParsedInt int)                          = show int
+unparse (ParsedList (ParsedSymbol "quote":exps)) = "'" ++ unwords (unparse <$> exps)
+unparse (ParsedList exps)                        = "(" ++ unwords (unparse <$> exps) ++ ")"
+unparse (ParseError IncompleteExpression)        = "Error: Incomplete expression!"
+unparse (ParseError ExpressionTooLarge)          = "Error: Expression too large!"

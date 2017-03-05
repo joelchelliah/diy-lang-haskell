@@ -5,6 +5,7 @@ import           Test.Tasty.HUnit
 import           Test.Tasty.Ingredients.FailFast
 
 import           Parser
+import           Types
 
 
 parseSymbol :: TestTree
@@ -201,14 +202,16 @@ parseQuote :: TestTree
 parseQuote = testCase
   "\n Test 1.12 - Parsing a quote. \n\
   \ Quoting is a shorthand syntax for calling the `quote` form. \n\
-  \ Quotes are represented as <ParsedQuote Parsed> in the AST. \n\
-  \ Examples: \n\
-  \     'foo -> (quote foo) \n\
-  \     '(foo bar) -> (quote (foo bar))" $ do
+  \ Quotes are represented as lists in the AST where the first \n\
+  \ element is always a <ParsedSymbol \"quote\"> \n\
+  \ Example: \n\
+  \     \"'foo\" -> ParsedList [ParsedSymbol \"quote\", ParsedSymbol \"foo\"]" $ do
 
   let input    = "(foo 'nil)"
       expected = ParsedList [ ParsedSymbol "foo"
-                            , ParsedQuote $ ParsedSymbol "nil"
+                            , ParsedList [ ParsedSymbol "quote"
+                                         , ParsedSymbol "nil"
+                                         ]
                             ]
 
   assertEqual (desc input) expected $ parse input
@@ -220,8 +223,9 @@ parseNestedQuotes = testCase
   \ Nested quotes should also work as expected" $ do
 
   let input    = "''''foo"
+      quote s  = ParsedList [ ParsedSymbol "quote", s ]
       expected =
-        ParsedQuote . ParsedQuote . ParsedQuote . ParsedQuote $ ParsedSymbol "foo"
+        quote . quote . quote . quote $ ParsedSymbol "foo"
 
   assertEqual (desc input) expected $ parse input
 
