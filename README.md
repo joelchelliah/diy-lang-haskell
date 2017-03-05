@@ -57,8 +57,8 @@ Before we get started, you need to install the Haskell tool **Stack**, clone thi
 
 #### Install Stack
 We will be using this tool to install and set up everything we need for our workshop.
-1. Check out their [README](https://docs.haskellstack.org/en/stable/README/) for installation information.
-2. Then install the [stack-run](https://hackage.haskell.org/package/stack-run) package, by running `stack install stack-run`. This gives us a handy command for building and running our project.
+- Install by following the [instuctions here](https://docs.haskellstack.org/en/stable/README/) based on your platform.
+- Then install the [stack-run](https://hackage.haskell.org/package/stack-run) package, by running `stack install stack-run`. This gives us a handy command for building and running our project.
 
 #### Clone this tutorial
 Then go ahead and clone this project:
@@ -69,7 +69,10 @@ https://github.com/joelchelliah/diy-lang-haskell.git
 #### Setup
 Finally, run the `stack-run` command from inside the project directory, and give it some time to install and set up all the necessary dependencies.
 
-If everything goes well, it should also build and run the project, which should output: `ParsedSymbol "Yay input!"`.
+If everything goes well, it should also build and run the project, which should output: 
+```haskell
+ParsedSymbol "Yay input!"
+```
 
 
 ## A few tips
@@ -90,7 +93,7 @@ Take the time to consider the following points before starting:
 
 - **The Haskell cheat sheet**
 
-  If it has been a while since you last wrote some Haskell, feel free to check out the [Haskell cheat sheet](http://cheatsheet.codeslower.com/CheatSheet.pdf) for some helpful pointers.
+  If it's been a while since you last wrote some Haskell code, then you might want to flip through this [Haskell cheat sheet](http://cheatsheet.codeslower.com/CheatSheet.pdf) for some helpful tips and tricks.
 
 - **Description of your language**
 
@@ -99,13 +102,11 @@ Take the time to consider the following points before starting:
 
 
 ## Getting started
-The workshop is split up into **eight parts**, each consisting of an introduction followed by a bunch of unit tests. It is your job to write the code that will make these tests pass . When all the tests pass, you'll have implemented that part of the language!
+The workshop is split up into **eight parts**, each consisting of an introduction followed by a bunch of unit tests. It is your job to write the code that will make these tests pass. When all the tests pass, you'll have implemented that part of the language!
 
-Run `stack test` to run the provided tests, which will point you towards what you should be implementing next!
+> Also, this [Haskell Cheet sheet](http://cheatsheet.codeslower.com/CheatSheet.pdf) might come in handy if you are feeling a bit rusty.
 
-This [Haskell Cheet sheet](http://cheatsheet.codeslower.com/CheatSheet.pdf) might come in handy if you are feeling a bit rusty.
-
-Have fun!
+**Have fun!**
 
 - [Part 1: parsing](parts/part_1.md)
 - [Part 2-8: Work in progress...](#current-status)
