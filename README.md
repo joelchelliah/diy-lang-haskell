@@ -2,25 +2,66 @@
 
 > `batteriesIncluded :: Maybe[Bool]`
 
-This is a **(WIP)** Haskell port of Kjetil Valle's [diy lang tutorial/workshop](https://github.com/kvalle/diy-lang) which guides you through implementing your own little programming language, from scratch!
+This is a **(WIP)** Haskell port of Kjetil Valle's [diy lang tutorial/workshop](https://github.com/kvalle/diy-lang) which guides you through implementing your very own programming language, from scratch!
 
+
+By the end of this tutorial you will be the proud author of a programming language, and will hopefully better understand how programming languages work  on a fundamental level.
+
+
+---
 ## Current status
-:exclamation: This project is a **Work in progress**, and is currently not very useful :(
+This project is still a **Work in progress** :
 
-:construction: **Part 1: parsing** almost done! Just missing a few more tests.
+:white_check_mark: [Part 1: parsing](parts/part_1.md) - **Done**  
+:construction: Part 2: evaluating simple expressions - **Wip**  
+:soon: Parts 3-8 - **Todo**
 
-...
+---
+
+
+## What we will be making
+
+We will make a relatively simple, but neat language. We aim for the following features:
+
+- A handful of datatypes (integers, booleans and symbols)
+- Variables
+- First class functions with lexical scoping
+- That nice homemade quality feeling
+
+We will *not* have:
+
+- A proper type system
+- Error handling
+- Good performance
+- And much, much more...
+
+The language should be able to interpret the following code by the time we are done:
+
+```lisp
+(define fact
+    ;; Factorial function
+    (lambda (n)
+        (if (eq n 0)
+            1 ; Factorial of 0 is 1
+            (* n (fact (- n 1))))))
+
+;; When parsing the file, the last statement is returned
+(fact 5)
+```
+
+The syntax is very similar to languages in the Lisp family. If you find the example unfamiliar, you might want to have a look at [a more detailed description of the language](parts/language.md).
+
 
 ## Prerequisites
-Before we get started, you need to install the Haskell tool **Stack**, clone the workshop repo, and run the initial set up.
+Before we get started, you need to install the Haskell tool **Stack**, clone this tutorial, and run the initial setup.
 
 #### Install Stack
 We will be using this tool to install and set up everything we need for our workshop.
-* Check out their [README](https://docs.haskellstack.org/en/stable/README/) for installation information.
-* Install the [stack-run](https://hackage.haskell.org/package/stack-run) package which gives us a handy command for building and running our project.
+1. Check out their [README](https://docs.haskellstack.org/en/stable/README/) for installation information.
+2. Then install the [stack-run](https://hackage.haskell.org/package/stack-run) package, by running `stack install stack-run`. This gives us a handy command for building and running our project.
 
-#### Clone the workshop
-Then go ahead and clone this repository:
+#### Clone this tutorial
+Then go ahead and clone this project:
 ```bash
 https://github.com/joelchelliah/diy-lang-haskell.git
 ```
@@ -28,14 +69,43 @@ https://github.com/joelchelliah/diy-lang-haskell.git
 #### Setup
 Finally, run the `stack-run` command from inside the project directory, and give it some time to install and set up all the necessary dependencies.
 
-If everything goes well, it should also build and run the project, which should output: `ParsedString "Yay input!"`.
+If everything goes well, it should also build and run the project, which should output: `ParsedSymbol "Yay input!"`.
+
+
+## A few tips
+
+Take the time to consider the following points before starting:
+
+- **Keep things simple**
+
+  Don't make things more complicated than they need to be. The tests should hopefully guide you every step of the way.
+
+- **Read the test descriptions**
+
+  Each test has a small text describing what you are going to implement and why. Reading these should make things easier, and you might end up learning more.
+
+- **Use the provided functions**
+
+  Some of the more boring details are already taken care of. Take the time to look at the functions provided in the [ParserUtil.hs](util/ParserUtil.hs), and the various imports in files where you need to do some work.
+
+- **The Haskell cheat sheet**
+
+  If it has been a while since you last wrote some Haskell, feel free to check out the [Haskell cheat sheet](http://cheatsheet.codeslower.com/CheatSheet.pdf) for some helpful pointers.
+
+- **Description of your language**
+
+  Read a description of the language you are going to make in [language.md](parts/language.md).
+
 
 
 ## Getting started
-The workshop is split up into eight parts, each consisting of an introduction followed by a bunch of unit tests. It is your job to write the code that will make these tests pass . When all the tests pass, you'll have implemented that part of the language!
+The workshop is split up into **eight parts**, each consisting of an introduction followed by a bunch of unit tests. It is your job to write the code that will make these tests pass . When all the tests pass, you'll have implemented that part of the language!
 
 Run `stack test` to run the provided tests, which will point you towards what you should be implementing next!
 
-:scroll: This [Haskell Cheet sheet](http://cheatsheet.codeslower.com/CheatSheet.pdf) might come in handy if you are feeling a bit rusty.
+This [Haskell Cheet sheet](http://cheatsheet.codeslower.com/CheatSheet.pdf) might come in handy if you are feeling a bit rusty.
 
-I will update this README with more Haskell-specific information as I flesh out this port. But for now, please go see the [README of the original tutorial/workshop](https://github.com/kvalle/diy-lang) for more general information.
+Have fun!
+
+- [Part 1: parsing](parts/part_1.md)
+- [Part 2-8: Work in progress...](#current-status)
