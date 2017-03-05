@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
                      , util
   exposed-modules:     Parser
+                     , Evaluator
                      , ParserUtil
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
@@ -34,6 +35,7 @@ test-suite diy-lang-haskell-test
   hs-source-dirs:      test
   main-is:             Test.hs
   other-modules:       Test_1_Parser
+                     , Test_2_EvaluatingSimpleExpressions
   build-depends:       base
                      , tasty >= 0.11
                      , tasty-hunit
