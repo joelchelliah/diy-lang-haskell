@@ -1,9 +1,12 @@
 import           Test.Tasty
+import           Test.Tasty.Ingredients.FailFast
 
-import           Test_1_Parsing
+import           Test_1_Parser
 
 main :: IO ()
-main = defaultMain tests
+main = defaultMainWithIngredients (map failFast defaultIngredients) tests
 
 tests :: TestTree
-tests = testGroup "Tests" [parsingTests]
+tests = testGroup "DIY Lang Tests"
+  [ parsingTests
+  ]

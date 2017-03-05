@@ -1,81 +1,50 @@
 module Parser ( Parsed(..)
               , ParseErrorType(..)
-              , parse, unparse
+              , parse, unparse, parseMultiple
               ) where
+
+import           Data.Char  (isDigit)
+import           ParserUtil
 
 -- This is the Parser module, with the `parse` function which you'll
 -- implement as <part 1> of the workshop. Its job is to convert strings
 -- into data structures that the evaluator can understand.
 
 
--- Parse the string representation of one *single* expression into
--- the corresponding Abstract Syntax Tree.
-parse :: String -> Parsed
-parse source =
-  ParsedString "Implement this function!"
-
-
-
-
--- Below are a few useful utility functions that should come in handy when
--- implementing the `parse` function. We don't want to spend the day
--- implementing parenthesis counting, after all...
-
-
--- AST representation of the parsed expressions.
-data Parsed = ParsedString String
+-- The types we will be using to represent the different parts
+-- of our AST. You shouldn't need to define any other types.
+data Parsed = ParsedSymbol String
             | ParsedBool Bool
             | ParsedInt Int
             | ParsedList [Parsed]
+            | ParsedQuote Parsed
             | ParseError ParseErrorType
             deriving (Show, Eq)
 
--- AST representation of parser errors.
+-- Possible parser errors types.
 data ParseErrorType = IncompleteExpression
                     | ExpressionTooLarge
                     deriving (Show, Eq)
 
 
--- Remove from a string, anything between a semicolon (;)
--- and a linebreak (\n).
-removeComments :: String -> String
-removeComments source =
-  unlines $ takeWhile (/=';') <$> lines source
+----------------------------------------------------------------
+----------------------------------------------------------------
 
 
--- Given a string and a start-index, tries to find the index
--- of the next closing parenthesis that appears in the string.
-findClosingParen :: String -> Int -> Either ParseErrorType Int
-findClosingParen source startIndex =
-    let subExp = takeWhile (/= ')') . drop startIndex $ source
-        index  = startIndex + length subExp
-    in if index >= length source || source !! index /= ')'
-       then Left IncompleteExpression
-       else Right index
+-- Parses the string representation of a *single* expression and
+-- generates the corresponding Abstract Syntax Tree (AST).
+parse :: String -> Parsed
+parse source =
+  ParsedSymbol "Implement this function!"
+
+  -- Tip: A few userful utility functions, to help you along the
+  --      way, can be found in `util/ParserUtil.hs`.
 
 
--- Tries to split the string into (exp, rest) where exp
--- is the first expression in the string, and rest is
--- the remainder of the string after this expression.
-firstExpression :: String -> Either ParseErrorType (String, String)
-firstExpression "" = Right ("", "")
-firstExpression (' ':rest) = firstExpression rest
-firstExpression ('(':rest) =
-  let subExpFrom i = ('(' : take (i + 1) rest, drop (i + 1) rest)
-  in  subExpFrom <$> findClosingParen rest 0
-firstExpression exps = Right $ span (/= ' ') exps
 
 
--- Tries to splits the string into a list of sub-expressions
--- that can be parsed individually.
-splitExpressions :: String -> Either ParseErrorType [String]
-splitExpressions source =
-  case firstExpression source of
-    Left parsingError -> Left parsingError
-    Right ("", _)     -> Right []
-    Right (exp, rest) -> (exp :) <$> splitExpressions rest
-
-
+----------------------------------------------------------------
+----------------------------------------------------------------
 
 
 -- The functions below: `parseMultiple` and `unparse` are
@@ -83,21 +52,22 @@ splitExpressions source =
 -- Don't worry about them when implementing the language.
 
 
--- Tries to create a list of ASTs from a program source
--- string consisting of multiple expressions.
+-- Parses a string representation of *multiple* expressions
+-- and generates the corresponding Abstract Syntax Tree.
 parseMultiple :: String -> Parsed
 parseMultiple source =
   case splitExpressions $ removeComments source of
-    Left parsingError -> ParseError parsingError
+    Left parsingError -> ParseError IncompleteExpression
     Right expressions -> ParsedList $ parse <$> expressions
 
 
--- Turns an AST back into the program source string.
+-- Turns a Parsed AST back into a string representation.
 unparse :: Parsed -> String
-unparse (ParsedString string)             = string
+unparse (ParsedSymbol string)             = string
 unparse (ParsedBool True)                 = "#t"
 unparse (ParsedBool False)                = "#f"
 unparse (ParsedInt int)                   = show int
-unparse (ParsedList list)                 = concatMap unparse list
+unparse (ParsedList exps)                 = "(" ++ unwords (unparse <$> exps) ++ ")"
+unparse (ParsedQuote exp)                 = "'" ++ unparse exp
 unparse (ParseError IncompleteExpression) = "Error: Incomplete expression!"
 unparse (ParseError ExpressionTooLarge)   = "Error: Expression too large!"
