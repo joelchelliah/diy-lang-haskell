@@ -18,7 +18,7 @@ We will handle two types of expressions: **atoms** and **lists**.
 
 ### Special Forms
 
-The language will have a set of **special forms**. These are the construct built into the language. If a list expression is evaluated, and the first element is one of a number of defined symbols, the special form is executed:
+The language will have a set of **special forms**. These are constructs built into the language. If a list expression is evaluated, and the first element is one of a number of defined symbols, the special form is executed.
 
 Here is a brief explanation of each form:
 
@@ -29,7 +29,7 @@ Here is a brief explanation of each form:
 - `if` is the conditional, taking three arguments. It's return value is the result of evaluating the second or third argument, depending on the value of the first one.
 - `define` is used to define new variables in the environment.
 - `lambda` creates function closures.
-- `cons` is used to construct lists from a head (element) and the tail (list).
+- `cons` is used to construct lists from a head (element) and a tail (list).
 - `head` returns the first element of a list.
 - `tail` returns all but the first element of a list.
 
