@@ -56,22 +56,24 @@ The syntax is very similar to languages in the Lisp family. If you find the exam
 Before we get started, you need to install the Haskell tool **Stack**, clone this tutorial, and run the initial setup.
 
 #### Install Stack
-We will be using this tool to install and set up everything we need for our workshop.
-- Install by following the [instuctions here](https://docs.haskellstack.org/en/stable/README/) based on your platform.
-- Then install the [stack-run](https://hackage.haskell.org/package/stack-run) package, by running `stack install stack-run`. This gives us a handy command for building and running our project.
+We will be using this tool to install and set up everything we need for our workshop. Install **Stack** by following the [instuctions here](https://docs.haskellstack.org/en/stable/README/) based on your platform.
 
 #### Clone this tutorial
-Then go ahead and clone this project:
+Then go ahead and clone this project, and navigate to the project directory:
 ```bash
-https://github.com/joelchelliah/diy-lang-haskell.git
+https://github.com/joelchelliah/diy-lang-haskell.git && cd diy-lang-haskell
 ```
 
 #### Setup
-Finally, run the `stack-run` command from inside the project directory, and give it some time to install and set up all the necessary dependencies.
+- From inside the project directory, install the GHC compiler by running: `stack setup`.
+
+- Then install the [stack-run](https://hackage.haskell.org/package/stack-run) package, by running `stack install stack-run`. This gives us a handy command for building and running our project.
+
+- Finally, run the `stack-run` command, and give it some time to install and set up all the necessary dependencies.
 
 If everything goes well, it should also build and run the project, which should output: 
 ```haskell
-ParsedSymbol "Yay input!"
+ParsedSymbol "Implement this function!"
 ```
 
 
