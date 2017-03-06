@@ -13,8 +13,9 @@ By the end of this tutorial you will be the proud author of a programming langua
 This project is still a **Work in progress** :
 
 :white_check_mark: [Part 1: parsing](parts/part_1.md) - **Done**  
-:construction: Part 2: evaluating simple expressions - **Wip**  
-:soon: Parts 3-8 - **Todo**
+:white_check_mark: [Part 2: evaluating simple expressions](parts/part_2.md) - **Done**  
+:construction: Part 3: evaluating complex expressions - **Wip**  
+:soon: Parts 4-8 - **Todo**
 
 ---
 
@@ -71,7 +72,7 @@ https://github.com/joelchelliah/diy-lang-haskell.git && cd diy-lang-haskell
 
 - Finally, run the `stack-run` command, and give it some time to install and set up all the necessary dependencies.
 
-If everything goes well, it should also build and run the project, which should output: 
+If everything goes well, it should also build and run the project, which should output:
 ```haskell
 ParsedSymbol "Implement this function!"
 ```
@@ -111,4 +112,5 @@ The workshop is split up into **eight parts**, each consisting of an introductio
 **Have fun!**
 
 - [Part 1: parsing](parts/part_1.md)
-- [Part 2-8: Work in progress...](#current-status)
+- [Part 2: evaluating simple expressions](parts/part_2.md)
+- [Part 3-8: Work in progress...](#current-status)
