@@ -33,71 +33,71 @@ in parse program
 
 
 -- The generated AST data structure should look like this:
-ParsedList [ ParsedSymbol "define"
-           , ParsedSymbol "fact"
-           , ParsedList [ ParsedSymbol "lambda"
-                        , ParsedList [ ParsedSymbol "n" ]
-                        , ParsedList [ ParsedSymbol "if"
-                                     , ParsedList [ ParsedSymbol "<="
-                                                  , ParsedSymbol "n"
-                                                  , ParsedInt 1
-                                                  ]
-                                     , ParsedInt 1
-                                     , ParsedList [ ParsedSymbol "*"
-                                                  , ParsedSymbol "n"
-                                                  , ParsedList [ ParsedSymbol "fact"
-                                                               , ParsedList [ ParsedSymbol "-"
-                                                                            , ParsedSymbol "n"
-                                                                            , ParsedInt 1
-                                                                            ]
-                                                               ]
-                                                  ]
-                                     ]
-                        ]
-           ]
+DiyList [ DiySymbol "define"
+        , DiySymbol "fact"
+        , DiyList [ DiySymbol "lambda"
+                  , DiyList [ DiySymbol "n" ]
+                  , DiyList [ DiySymbol "if"
+                            , DiyList [ DiySymbol "<="
+                                      , DiySymbol "n"
+                                      , DiyInt 1
+                                      ]
+                            , DiyInt 1
+                            , DiyList [ DiySymbol "*"
+                                      , DiySymbol "n"
+                                      , DiyList [ DiySymbol "fact"
+                                                , DiyList [ DiySymbol "-"
+                                                          , DiySymbol "n"
+                                                          , DiyInt 1
+                                                          ]
+                                                ]
+                                      ]
+                            ]
+                  ]
+        ]
 ```
 
 #### The AST is created as follows
 
 - Comments are removed.
-- Each type of atom is then represented as a sub type of the `Parsed` data type.
-- Symbols are represented as `ParsedSymbol :: String -> Parsed`.
+- Each type of atom is then represented as a sub type of the `DiyAST` data type.
+- Symbols are represented as `DiySymbol :: String -> DiyAST`.
     + `"foo"` parses to:
     ```haskell
-      ParsedSymbol "foo"
+      DiySymbol "foo"
     ```
-- The special symbols `#t` and `#f` are represented as `ParsedBool :: Bool -> Parsed`.
+- The special symbols `#t` and `#f` are represented as `DiyBool :: Bool -> DiyAST`.
     + `"#t"` parses to:
     ```haskell
-      ParsedBool True
+      DiyBool True
     ```
-- Integers are represented as `ParsedInt :: Int -> Parsed`.
+- Integers are represented as `DiyInt :: Int -> DiyAST`.
     + `"42"` parses to:
     ```haskell
-      ParsedInt 42
+      DiyInt 42
     ```
-- List expressions are represented as `ParsedList :: [Parsed] -> Parsed`.
+- List expressions are represented as `DiyList :: [DiyAST] -> DiyAST`.
     + `"(foo #f 100)"` parses to:
     ```haskell
-      ParsedList [ ParsedSymbol "foo"
-                 , ParsedBool False
-                 , ParsedInt 100
-                 ]
+      DiyList [ DiySymbol "foo"
+              , DiyBool False
+              , DiyInt 100
+              ]
     ```
 - Nested expressions are parsed accordingly.
     + `"((+ (- 1 2) (* 3 42)))"` parses to:
     ```haskell
-    ParsedList [ ParsedList [ ParsedSymbol "+"
-                            , ParsedList [ ParsedSymbol "-"
-                                         , ParsedInt 1
-                                         , ParsedInt 2
-                                         ]
-                            , ParsedList [ ParsedSymbol "*"
-                                         , ParsedInt 3
-                                         , ParsedInt 42
-                                         ]
-                            ]
-               ]
+    DiyList [ DiyList [ DiySymbol "+"
+                      , DiyList [ DiySymbol "-"
+                                , DiyInt 1
+                                , DiyInt 2
+                                ]
+                      , DiyList [ DiySymbol "*"
+                                , DiyInt 3
+                                , DiyInt 42
+                                ]
+                      ]
+            ]
     ```
 
 
@@ -105,7 +105,7 @@ ParsedList [ ParsedSymbol "define"
 
 The parsing is done in `Parser.hs`. Here, you will be implementing the following function:
 ```haskell
-parse :: String -> Parsed
+parse :: String -> DiyAST
 ```
 A lot of the gritty work of counting parentheses and such has already been done for you in `ParserUtil.hs`, but you must still stitch everything together.
 

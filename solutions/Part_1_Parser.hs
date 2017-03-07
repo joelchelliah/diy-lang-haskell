@@ -8,14 +8,14 @@ import           Types
 
 -- Solution for part 1: Parser
 
-parse :: String -> Parsed
+parse :: String -> DiyAST
 parse source =
   case clean source of
-    "#t"       -> ParsedBool True
-    "#f"       -> ParsedBool False
+    "#t"       -> DiyBool True
+    "#f"       -> DiyBool False
     ('\'':exp) -> parseQuote exp
     ('(':rest) -> parseList $ init rest
-    (')':_)    -> ParseError ExpressionTooLarge
+    (')':_)    -> DiyError ExpressionTooLarge
     other      -> parseIntOrSymbol other
 
   where clean = removeWhiteSpace . removeComments
@@ -24,16 +24,16 @@ parse source =
 
         parseIntOrSymbol src =
           if all isDigit src
-          then ParsedInt $ read src
-          else ParsedSymbol src
+          then DiyInt $ read src
+          else DiySymbol src
 
-        parseQuote src = ParsedList [ ParsedSymbol "quote", parse src ]
+        parseQuote src = DiyList [ DiySymbol "quote", parse src ]
 
         parseList src =
           case splitExpressions src of
-            Right exps -> foldr listOrError (ParsedList []) $ parse <$> exps
-            Left  oops -> ParseError IncompleteExpression
+            Right exps -> foldr listOrError (DiyList []) $ parse <$> exps
+            Left  oops -> DiyError IncompleteExpression
 
-        listOrError (ParseError err) _    = ParseError err
-        listOrError exp (ParsedList exps) = ParsedList (exp:exps)
-        listOrError _ (ParseError err)    = ParseError err
+        listOrError (DiyError err) _   = DiyError err
+        listOrError exp (DiyList exps) = DiyList (exp:exps)
+        listOrError _ (DiyError err)   = DiyError err

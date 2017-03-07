@@ -18,8 +18,8 @@ evaluateBoolean = testCase
 
     let assertEval i = assertEvaluateWithoutEnvironment (i, i)
 
-    mapM_ assertEval [ ParsedBool True
-                     , ParsedBool False
+    mapM_ assertEval [ DiyBool True
+                     , DiyBool False
                      ]
 
 
@@ -30,9 +30,9 @@ evaluateInteger = testCase
 
     let assertEval i = assertEvaluateWithoutEnvironment (i, i)
 
-    mapM_ assertEval [ ParsedInt 42
-                     , ParsedInt 1337
-                     , ParsedInt 0
+    mapM_ assertEval [ DiyInt 42
+                     , DiyInt 1337
+                     , DiyInt 0
                      ]
 
 
@@ -42,13 +42,13 @@ evaluateQuote = testCase
   \ When a call is done to the `quote` form, the argument \n\
   \ should be returned without being evaluated" $ do
 
-    let pairWithQuotedExp exp = (ParsedList [ ParsedSymbol "quote", exp] , exp)
+    let pairWithQuotedExp exp = (DiyList [ DiySymbol "quote", exp] , exp)
 
     mapM_ assertEvaluateWithoutEnvironment
         $ pairWithQuotedExp <$>
-          [ ParsedSymbol "foo"
-          , ParsedList []
-          , ParsedList [ ParsedInt 0, ParsedInt 69, ParsedBool False]
+          [ DiySymbol "foo"
+          , DiyList []
+          , DiyList [ DiyInt 0, DiyInt 69, DiyBool False]
           ]
 
 
@@ -65,11 +65,11 @@ evaluateAtomFunction = testCase
   \ before the check is done" $
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(atom #t)"      , ParsedBool True )
-        , (parse "(atom #f)"      , ParsedBool True )
-        , (parse "(atom 42)"      , ParsedBool True )
-        , (parse "(atom 'foo)"    , ParsedBool True )
-        , (parse "(atom (1 2 #f))", ParsedBool False)
+        [ (parse "(atom #t)"      , DiyBool True )
+        , (parse "(atom #f)"      , DiyBool True )
+        , (parse "(atom 42)"      , DiyBool True )
+        , (parse "(atom 'foo)"    , DiyBool True )
+        , (parse "(atom (1 2 #f))", DiyBool False)
         ]
 
 
@@ -81,12 +81,12 @@ evaluateEqFunction = testCase
   \ Note that lists are never equal, because lists are not atoms" $
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(eq 1 1)"              , ParsedBool True )
-        , (parse "(eq 1 2)"              , ParsedBool False)
-        , (parse "(eq 'foo 'foo)"        , ParsedBool True )
-        , (parse "(eq 'foo 'bar)"        , ParsedBool False)
+        [ (parse "(eq 1 1)"              , DiyBool True )
+        , (parse "(eq 1 2)"              , DiyBool False)
+        , (parse "(eq 'foo 'foo)"        , DiyBool True )
+        , (parse "(eq 'foo 'bar)"        , DiyBool False)
         -- Lists are never equal, because lists are not atoms
-        , (parse "(eq '(1 2 3) '(1 2 3))", ParsedBool False)
+        , (parse "(eq '(1 2 3) '(1 2 3))", DiyBool False)
         ]
 
 
@@ -98,14 +98,14 @@ evaluateBasicMathOperators = testCase
   \ the modulo operator" $
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(+ 23 19)", ParsedInt  42   )
-        , (parse "(- 2 1)"  , ParsedInt  1    )
-        , (parse "(/ 6 2)"  , ParsedInt  3    )
-        , (parse "(/ 7 2)"  , ParsedInt  3    )
-        , (parse "(mod 7 2)", ParsedInt  1    )
-        , (parse "(> 7 2)"  , ParsedBool True )
-        , (parse "(> 2 7)"  , ParsedBool False)
-        , (parse "(> 4 4)"  , ParsedBool False)
+        [ (parse "(+ 23 19)", DiyInt  42   )
+        , (parse "(- 2 1)"  , DiyInt  1    )
+        , (parse "(/ 6 2)"  , DiyInt  3    )
+        , (parse "(/ 7 2)"  , DiyInt  3    )
+        , (parse "(mod 7 2)", DiyInt  1    )
+        , (parse "(> 7 2)"  , DiyBool True )
+        , (parse "(> 2 7)"  , DiyBool False)
+        , (parse "(> 4 4)"  , DiyBool False)
         ]
 
 
@@ -115,14 +115,14 @@ evaluateMathOperatorsOnOtherInput = testCase
   \ The math operators should only allow numbers as arguments" $
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(+ 1 'foo)"  , ParseError InvalidArgument)
-        , (parse "(- 1 'foo)"  , ParseError InvalidArgument)
-        , (parse "(/ 1 'foo)"  , ParseError InvalidArgument)
-        , (parse "(mod 1 'foo)", ParseError InvalidArgument)
+        [ (parse "(+ 1 'foo)"  , DiyError InvalidArgument)
+        , (parse "(- 1 'foo)"  , DiyError InvalidArgument)
+        , (parse "(/ 1 'foo)"  , DiyError InvalidArgument)
+        , (parse "(mod 1 'foo)", DiyError InvalidArgument)
         ]
 
 
-assertEvaluateWithoutEnvironment :: (Parsed, Parsed) -> Assertion
+assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion
 assertEvaluateWithoutEnvironment (input, expected) =
   assertEqual description expected result
 
@@ -130,7 +130,7 @@ assertEvaluateWithoutEnvironment (input, expected) =
         result      = evaluate input environment
         environment = ""
 
-desc :: Parsed -> String -> String
+desc :: DiyAST -> String -> String
 desc input env =
   "evaluate (" ++ show input ++ ") \"" ++ env ++ "\""
 

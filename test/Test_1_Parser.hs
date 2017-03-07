@@ -12,41 +12,41 @@ parseSymbol :: TestTree
 parseSymbol = testCase
   "\n Test 1.1 - Parsing a single symbol. \n\
   \ Symbols are represented by strings. Parsing a single symbol \n\
-  \ should result in an AST consisting of a <ParsedSymbol String>" $ do
+  \ should result in an AST consisting of a <DiySymbol String>" $ do
 
     let input = "foo"
 
-    assertEqual (desc input) (ParsedSymbol input) $ parse input
+    assertEqual (desc input) (DiySymbol input) $ parse input
 
 
 parseBoolean :: TestTree
 parseBoolean = testCase
   "\n Test 1.2 - Parsing a single boolean. \n\
   \ Booleans are the special symbols #t and #f. In the AST \n\
-  \ they are represented as <ParsedBool Bool>" $ do
+  \ they are represented as <DiyBool Bool>" $ do
 
-  assertEqual (desc "#t") (ParsedBool True)  $ parse "#t"
-  assertEqual (desc "#f") (ParsedBool False) $ parse "#f"
+  assertEqual (desc "#t") (DiyBool True)  $ parse "#t"
+  assertEqual (desc "#f") (DiyBool False) $ parse "#f"
 
 
 parseInteger :: TestTree
 parseInteger = testCase
   "\n Test 1.3 - Parsing a single integer. \n\
-  \ Integers are represented in the AST as <ParsedInt Int>. \n\
+  \ Integers are represented in the AST as <DiyInt Int>. \n\
   \ Tip: The Data.Char library has a handy `isDigit` function" $ do
 
-  assertEqual (desc "42")   (ParsedInt 42)    $ parse "42"
-  assertEqual (desc "1337") (ParsedInt 1337)  $ parse "1337"
+  assertEqual (desc "42")   (DiyInt 42)    $ parse "42"
+  assertEqual (desc "1337") (DiyInt 1337)  $ parse "1337"
 
 
 parseListOfSymbols :: TestTree
 parseListOfSymbols = testCase
   "\n Test 1.4 - Parsing a list of symbols. \n\
   \ A list is represented by a number of elements surrounded by parens. \n\
-  \ <ParsedList [Parsed]> are used to represent lists as ASTs" $ do
+  \ <DiyList [DiyAST]> are used to represent lists as ASTs" $ do
 
-  let expectedList  = ParsedList $ ParsedSymbol <$> ["foo", "bar", "baz"]
-      expectedEmpty = ParsedList []
+  let expectedList  = DiyList $ DiySymbol <$> ["foo", "bar", "baz"]
+      expectedEmpty = DiyList []
 
   assertEqual (desc "(foo bar baz)") expectedList  $ parse "(foo bar baz)"
   assertEqual (desc "()")            expectedEmpty $ parse "()"
@@ -59,10 +59,10 @@ parseListOfMixedTypes = testCase
   \ also parsed properly" $ do
 
   let input    = "(foo #t 123)"
-      expected = ParsedList [ ParsedSymbol "foo"
-                            , ParsedBool True
-                            , ParsedInt 123
-                            ]
+      expected = DiyList [ DiySymbol "foo"
+                         , DiyBool True
+                         , DiyInt 123
+                         ]
 
   assertEqual (desc input) expected $ parse input
 
@@ -74,15 +74,15 @@ parseNestedLists = testCase
 
   let input    = "(foo (bar ((#t)) x) (baz y))"
       expected =
-        ParsedList [ ParsedSymbol "foo"
-                   , ParsedList [ ParsedSymbol "bar"
-                                , ParsedList [ ParsedList [ ParsedBool True ] ]
-                                , ParsedSymbol "x"
-                                ]
-                   , ParsedList [ ParsedSymbol "baz"
-                                , ParsedSymbol "y"
-                                ]
-                   ]
+        DiyList [ DiySymbol "foo"
+                , DiyList [ DiySymbol "bar"
+                          , DiyList [ DiyList [ DiyBool True ] ]
+                          , DiySymbol "x"
+                          ]
+                , DiyList [ DiySymbol "baz"
+                          , DiySymbol "y"
+                          ]
+                ]
 
   assertEqual (desc input) expected $ parse input
 
@@ -90,11 +90,11 @@ parseNestedLists = testCase
 parseErrorWhenMissingParen :: TestTree
 parseErrorWhenMissingParen = testCase
   "\n Test 1.7 - Parsing incomplete expressions. \n\
-  \ A <ParseError IncompleteExpression> should be produced if \n\
+  \ A <DiyError IncompleteExpression> should be produced if \n\
   \ the given expression is missing a parenthesis" $ do
 
   let input    = "(foo (bar x y)"
-      expected = ParseError IncompleteExpression
+      expected = DiyError IncompleteExpression
 
   assertEqual (desc input) expected $ parse input
 
@@ -103,11 +103,11 @@ parseErrorWhenExtraParen :: TestTree
 parseErrorWhenExtraParen = testCase
   "\n Test 1.8 - Parsing too large expressions. \n\
   \ The parse function expects to receive only one single expression. \n\
-  \ A <ParseError ExpressionTooLarge> should be produced if \n\
+  \ A <DiyError ExpressionTooLarge> should be produced if \n\
   \ the given expression has an extra parenthesis" $ do
 
   let input    = "(foo (bar x y)))"
-      expected = ParseError ExpressionTooLarge
+      expected = DiyError ExpressionTooLarge
 
   assertEqual (desc input) expected $ parse input
   assertEqual (desc input) expected $ parse input
@@ -120,11 +120,11 @@ parseWithExtraWhitespace = testCase
   \ <Prelude> library might come in handy here" $ do
 
   let input    = "\n(program    with   much        whitespace)\n"
-      expected = ParsedList [ ParsedSymbol "program"
-                            , ParsedSymbol "with"
-                            , ParsedSymbol "much"
-                            , ParsedSymbol "whitespace"
-                            ]
+      expected = DiyList [ DiySymbol "program"
+                         , DiySymbol "with"
+                         , DiySymbol "much"
+                         , DiySymbol "whitespace"
+                         ]
 
   assertEqual (desc input) expected $ parse input
 
@@ -143,16 +143,16 @@ parseComments = testCase
         \       42 ; inline comment! \n\
         \       (something else)))"
       expected =
-        ParsedList [ ParsedSymbol "define"
-                   , ParsedSymbol "variable"
-                   , ParsedList [ ParsedSymbol "if"
-                                , ParsedBool True
-                                , ParsedInt 42
-                                , ParsedList [ ParsedSymbol "something"
-                                             , ParsedSymbol "else"
-                                             ]
-                                ]
-                   ]
+        DiyList [ DiySymbol "define"
+                , DiySymbol "variable"
+                , DiyList [ DiySymbol "if"
+                          , DiyBool True
+                          , DiyInt 42
+                          , DiyList [ DiySymbol "something"
+                                    , DiySymbol "else"
+                                    ]
+                          ]
+                ]
 
   assertEqual (desc input) expected $ parse input
 
@@ -172,28 +172,28 @@ parseLargerExamples = testCase
         \              ; the existence of negative numbers \n\
         \            (* n (fact (- n 1))))))"
       expected =
-        ParsedList [ ParsedSymbol "define"
-                   , ParsedSymbol "fact"
-                   , ParsedList [ ParsedSymbol "lambda"
-                                , ParsedList [ ParsedSymbol "n" ]
-                                , ParsedList [ ParsedSymbol "if"
-                                             , ParsedList [ ParsedSymbol "<="
-                                                          , ParsedSymbol "n"
-                                                          , ParsedInt 1
-                                                          ]
-                                             , ParsedInt 1
-                                             , ParsedList [ ParsedSymbol "*"
-                                                          , ParsedSymbol "n"
-                                                          , ParsedList [ ParsedSymbol "fact"
-                                                                       , ParsedList [ ParsedSymbol "-"
-                                                                                    , ParsedSymbol "n"
-                                                                                    , ParsedInt 1
-                                                                                    ]
-                                                                       ]
-                                                          ]
-                                             ]
-                                ]
-                   ]
+        DiyList [ DiySymbol "define"
+                , DiySymbol "fact"
+                , DiyList [ DiySymbol "lambda"
+                          , DiyList [ DiySymbol "n" ]
+                          , DiyList [ DiySymbol "if"
+                                    , DiyList [ DiySymbol "<="
+                                              , DiySymbol "n"
+                                              , DiyInt 1
+                                              ]
+                                    , DiyInt 1
+                                    , DiyList [ DiySymbol "*"
+                                              , DiySymbol "n"
+                                              , DiyList [ DiySymbol "fact"
+                                                        , DiyList [ DiySymbol "-"
+                                                                  , DiySymbol "n"
+                                                                  , DiyInt 1
+                                                                  ]
+                                                        ]
+                                              ]
+                                    ]
+                          ]
+                ]
 
   assertEqual (desc input) expected $ parse input
 
@@ -203,16 +203,16 @@ parseQuote = testCase
   "\n Test 1.12 - Parsing a quote. \n\
   \ Quoting is a shorthand syntax for calling the `quote` form. \n\
   \ Quotes are represented as lists in the AST where the first \n\
-  \ element is always a <ParsedSymbol \"quote\"> \n\
+  \ element is always a <DiySymbol \"quote\"> \n\
   \ Example: \n\
-  \     \"'foo\" -> ParsedList [ParsedSymbol \"quote\", ParsedSymbol \"foo\"]" $ do
+  \     \"'foo\" -> DiyList [DiySymbol \"quote\", DiySymbol \"foo\"]" $ do
 
   let input    = "(foo 'nil)"
-      expected = ParsedList [ ParsedSymbol "foo"
-                            , ParsedList [ ParsedSymbol "quote"
-                                         , ParsedSymbol "nil"
-                                         ]
-                            ]
+      expected = DiyList [ DiySymbol "foo"
+                         , DiyList [ DiySymbol "quote"
+                                   , DiySymbol "nil"
+                                   ]
+                         ]
 
   assertEqual (desc input) expected $ parse input
 
@@ -223,9 +223,9 @@ parseNestedQuotes = testCase
   \ Nested quotes should also work as expected" $ do
 
   let input    = "''''foo"
-      quote s  = ParsedList [ ParsedSymbol "quote", s ]
+      quote s  = DiyList [ DiySymbol "quote", s ]
       expected =
-        quote . quote . quote . quote $ ParsedSymbol "foo"
+        quote . quote . quote . quote $ DiySymbol "foo"
 
   assertEqual (desc input) expected $ parse input
 

@@ -23,11 +23,9 @@ import           Types
 
 -- Parses the string representation of a *single* expression and
 -- generates the corresponding Abstract Syntax Tree (AST).
-parse :: String -> Parsed
+parse :: String -> DiyAST
 parse source =
-  ParsedSymbol "Implement this function!"
-
-
+  DiySymbol "Implement this function!"
 
 
 ----------------------------------------------------------------
@@ -41,20 +39,20 @@ parse source =
 
 -- Parses a string representation of *multiple* expressions
 -- and generates the corresponding Abstract Syntax Tree.
-parseMultiple :: String -> Parsed
+parseMultiple :: String -> DiyAST
 parseMultiple source =
   case splitExpressions $ removeComments source of
-    Left parsingError -> ParseError IncompleteExpression
-    Right expressions -> ParsedList $ parse <$> expressions
+    Left parsingError -> DiyError IncompleteExpression
+    Right expressions -> DiyList $ parse <$> expressions
 
 
--- Turns a Parsed AST back into a string representation.
-unparse :: Parsed -> String
-unparse (ParsedSymbol string)                    = string
-unparse (ParsedBool True)                        = "#t"
-unparse (ParsedBool False)                       = "#f"
-unparse (ParsedInt int)                          = show int
-unparse (ParsedList (ParsedSymbol "quote":exps)) = "'" ++ unwords (unparse <$> exps)
-unparse (ParsedList exps)                        = "(" ++ unwords (unparse <$> exps) ++ ")"
-unparse (ParseError IncompleteExpression)        = "Error: Incomplete expression!"
-unparse (ParseError ExpressionTooLarge)          = "Error: Expression too large!"
+-- Turns a Diy AST back into a string representation.
+unparse :: DiyAST -> String
+unparse (DiySymbol string)                    = string
+unparse (DiyBool True)                        = "#t"
+unparse (DiyBool False)                       = "#f"
+unparse (DiyInt int)                          = show int
+unparse (DiyList (DiySymbol "quote":exps)) = "'" ++ unwords (unparse <$> exps)
+unparse (DiyList exps)                        = "(" ++ unwords (unparse <$> exps) ++ ")"
+unparse (DiyError IncompleteExpression)        = "Error: Incomplete expression!"
+unparse (DiyError ExpressionTooLarge)          = "Error: Expression too large!"

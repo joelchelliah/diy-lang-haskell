@@ -73,7 +73,7 @@ https://github.com/joelchelliah/diy-lang-haskell.git && cd diy-lang-haskell
 
 If everything goes well, it should also build and run the project, which should output:
 ```haskell
-ParsedSymbol "Implement this function!"
+DiySymbol "Implement this function!"
 ```
 
 

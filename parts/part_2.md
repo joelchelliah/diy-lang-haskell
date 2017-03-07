@@ -7,7 +7,10 @@ Now that we have the parser up and running, it's time to start working on the ev
 - `eq` returns true if both of its arguments are the same atom, and false otherwise.
 - The arithmetic operators (`+`, `-`, `*`, `/`, `mod` and `>`) all take two arguments, and do exactly what you would expect.
 
-This time, your work is in the file `Evaluator.hs`.
+This time, your work is in the `Evaluator.hs` module, where you will be implementing:
+```haskell
+evaluate :: DiyAST -> String -> DiyAST
+```
 
 ## Make it happen!
 

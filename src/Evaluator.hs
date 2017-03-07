@@ -14,9 +14,9 @@ import           Types
 
 
 -- Evaluates an AST in the specified environment.
-evaluate :: Parsed -> String -> Parsed
+evaluate :: DiyAST -> String -> DiyAST
 evaluate ast env =
-  ParsedSymbol "Implement this function!"
+  DiySymbol "Implement this function!"
 
 
 ----------------------------------------------------------------
