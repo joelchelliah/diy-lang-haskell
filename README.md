@@ -12,9 +12,8 @@ By the end of this tutorial you will be the proud author of a programming langua
 ## Current status
 This project is still a **Work in progress** :
 
-:white_check_mark: [Part 1: parsing](parts/part_1.md) - **Done**  
-:white_check_mark: [Part 2: evaluating simple expressions](parts/part_2.md) - **Done**  
-:construction: Part 3: evaluating complex expressions - **Wip**  
+:white_check_mark: Parts 1-2 - **Done**  
+:construction: Part 3 - **Wip**  
 :soon: Parts 4-8 - **Todo**
 
 ---
@@ -111,6 +110,11 @@ The workshop is split up into **eight parts**, each consisting of an introductio
 
 **Have fun!**
 
-- [Part 1: parsing](parts/part_1.md)
-- [Part 2: evaluating simple expressions](parts/part_2.md)
-- [Part 3-8: Work in progress...](#current-status)
+- [Part 1: Parsing](parts/part_1.md)
+- [Part 2: Evaluating simple expressions](parts/part_2.md)
+- [Part 3: Evaluating complex expressions](parts/part_3.md)
+- [Part 4: Working with variables](parts/part_4.md)
+- [Part 5: Functions](parts/part_5.md)
+- [Part 6: Working with lists](parts/part_6.md)
+- [Part 7: Using your language](parts/part_7.md)
+- [Part 8: Final touches](parts/part_8.md)

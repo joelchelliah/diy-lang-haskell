@@ -1,4 +1,4 @@
-# Part 1: parsing
+# Part 1: Parsing
 
 The language we are making is an interpreted one. This means that we basically need to implement two things: a **parser** and an **evaluator**. In this first part, we will implement the parser.
 

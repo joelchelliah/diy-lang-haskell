@@ -33,4 +33,4 @@ Remember, you'll need to restart the REPL for it to pick up any changes you make
 
 ## What's next?
 
-Head on to [part 3](part_3.md) where the expressions we take become slightly more complex.
+Head on to [part 3](part_3.md), where the expressions we take become slightly more complex.
