@@ -1,15 +1,14 @@
-module Part_1_Parser where
+module ParserSolution where
 
 import           Data.Char  (isDigit)
-import           Parser     hiding (parse)
 import           ParserUtil
 import           Types
 
 
 -- Solution for part 1: Parser
 
-parse :: String -> DiyAST
-parse source =
+parse' :: String -> DiyAST
+parse' source =
   case clean source of
     "#t"       -> DiyBool True
     "#f"       -> DiyBool False
@@ -18,20 +17,22 @@ parse source =
     (')':_)    -> DiyError ExpressionTooLarge
     other      -> parseIntOrSymbol other
 
-  where clean = removeWhiteSpace . removeComments
+  where clean =
+          removeWhiteSpace . removeComments
 
-        removeWhiteSpace = unwords . filter ((0 <) . length) . lines
+        removeWhiteSpace =
+          unwords . concatMap words . filter ((0 <) . length) . lines
 
         parseIntOrSymbol src =
           if all isDigit src
           then DiyInt $ read src
           else DiySymbol src
 
-        parseQuote src = DiyList [ DiySymbol "quote", parse src ]
+        parseQuote src = DiyList [ DiySymbol "quote", parse' src ]
 
         parseList src =
           case splitExpressions src of
-            Right exps -> foldr listOrError (DiyList []) $ parse <$> exps
+            Right exps -> foldr listOrError (DiyList []) $ parse' <$> exps
             Left  oops -> DiyError IncompleteExpression
 
         listOrError (DiyError err) _   = DiyError err

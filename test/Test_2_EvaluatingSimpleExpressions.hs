@@ -8,8 +8,6 @@ import           Evaluator
 import           Parser                          (parse)
 import           Types
 
--- We will start by implementing evaluation of simple expressions.
-
 
 evaluateBoolean :: TestTree
 evaluateBoolean = testCase

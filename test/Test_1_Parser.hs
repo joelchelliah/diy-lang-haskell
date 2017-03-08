@@ -119,7 +119,7 @@ parseWithExtraWhitespace = testCase
   \ Tip: The `lines` and `words` functions from the standard \n\
   \ <Prelude> library might come in handy here" $ do
 
-  let input    = "\n(program    with   much        whitespace)\n"
+  let input    = "\n      (program    with   much        whitespace)\n"
       expected = DiyList [ DiySymbol "program"
                          , DiySymbol "with"
                          , DiySymbol "much"

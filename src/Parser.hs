@@ -1,9 +1,8 @@
 module Parser ( parse, unparse, parseMultiple ) where
 
-import           Data.Char  (isDigit)
+import           Data.Char      (isDigit)
 import           ParserUtil
 import           Types
-
 
 -- This is the Parser module, with the `parse` function which you'll
 -- implement as <part 1> of the workshop. Its job is to convert strings
