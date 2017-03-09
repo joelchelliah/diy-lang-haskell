@@ -1,9 +1,8 @@
 module Types where
 
 
--- This module holds all the types we will be using to represent our
--- abstract syntax tree. There are still a few types missing here,
--- which you will be implementing in the later parts of the workshop.
+-- This module holds the types which will represent our
+-- abstract syntax tree.
 
 
 -- The types representing the different parts of our AST.
@@ -14,13 +13,11 @@ data DiyAST = DiySymbol String
             | DiyError DiyErrorType
             deriving (Show, Eq)
 
--- The types representing all the possible errors which may occur during
--- the parsing or evaluation phases.
+
+-- The types representing all the possible errors which may
+-- occur during the parsing or evaluation phases.
 data DiyErrorType = IncompleteExpression
                   | ExpressionTooLarge
                   | InvalidArgument
+                  | LookUpError String
                  deriving (Show, Eq)
-
-
--- Implement this type in <part 4> :
--- data Environment = ???

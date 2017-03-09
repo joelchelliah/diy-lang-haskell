@@ -5,7 +5,7 @@ import           ParserUtil
 import           Types
 
 
--- Solution for part 1: Parser
+-- Solution for part 1:
 
 parse' :: String -> DiyAST
 parse' source =

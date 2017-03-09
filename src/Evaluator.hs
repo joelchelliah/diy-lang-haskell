@@ -1,6 +1,9 @@
 module Evaluator where
 
+import           Environment
+import           EvaluatorSolution
 import           Parser            (unparse)
+import           Prelude                         hiding (lookup)
 import           Types
 
 
@@ -13,10 +16,12 @@ import           Types
 ----------------------------------------------------------------
 
 
--- Evaluates an AST in the specified environment.
-evaluate :: DiyAST -> String -> DiyAST
+-- Evaluates an AST in the specified environment, and produces
+-- the AST of the evaluated result along with the updated environment.
+evaluate :: DiyAST -> Environment -> (DiyAST, Environment)
 evaluate ast env =
-  DiySymbol "Implement this function!"
+  --DiySymbol "Implement this function!"
+  evaluate' ast env
 
 
 ----------------------------------------------------------------

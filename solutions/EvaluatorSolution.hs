@@ -1,17 +1,21 @@
 module EvaluatorSolution where
 
+import           Environment
+import           Prelude     hiding (lookup)
 import           Types
 
 
--- Solutions for part 2 - 3: Evaluator
+-- Solutions for part 2 - 6:
 
-evaluate' :: DiyAST -> String -> DiyAST
+evaluate' :: DiyAST -> Environment -> (DiyAST, Environment)
 evaluate' ast env =
   case ast of
-    DiyList list -> evaluateList list
-    expression   -> expression
+    DiyList list -> (evaluateList list, env)
+    expression   -> (expression, env)
 
-  where eval = flip evaluate' env
+  where eval exp =
+          let (result, _) = evaluate' exp env
+          in result
 
         evaluateList [DiySymbol "quote", exp]       = exp
         evaluateList [DiySymbol "atom", exp]        = isAtom exp
@@ -37,13 +41,14 @@ evaluate' ast env =
         -- `eq` :
 
         isEqual (DiyList [DiySymbol "quote", s1])
-                (DiyList [DiySymbol "quote", s2]) = isEqual s1 s2
-        isEqual e1@(DiyList _) e2                 = isEqual (eval e1) e2
-        isEqual e1 e2@(DiyList _)                 = isEqual e1 (eval e2)
-        isEqual (DiySymbol s1) (DiySymbol s2)     = DiyBool $ s1 == s2
-        isEqual (DiyBool s1) (DiyBool s2)         = DiyBool $ s1 == s2
-        isEqual (DiyInt s1) (DiyInt s2)           = DiyBool $ s1 == s2
-        isEqual _ _                               = DiyBool False
+                (DiyList [DiySymbol "quote", s2])    = isEqual s1 s2
+        isEqual (DiyList l1) (DiyList l2) | l1 == l2 = DiyBool False
+        isEqual e1@(DiyList _) e2                    = isEqual (eval e1) e2
+        isEqual e1 e2@(DiyList _)                    = isEqual e1 (eval e2)
+        isEqual (DiySymbol s1) (DiySymbol s2)        = DiyBool $ s1 == s2
+        isEqual (DiyBool s1) (DiyBool s2)            = DiyBool $ s1 == s2
+        isEqual (DiyInt s1) (DiyInt s2)              = DiyBool $ s1 == s2
+        isEqual _ _                                  = DiyBool False
 
 
         -- math operators :
@@ -64,5 +69,5 @@ evaluate' ast env =
         -- `if` :
 
         ifElse cond e1 e2
-          | (eval cond) == (DiyBool True) = eval e1
-          | otherwise                     = eval e2
+          | eval cond == DiyBool True = eval e1
+          | otherwise                 = eval e2

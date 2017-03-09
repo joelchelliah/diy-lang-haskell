@@ -7,6 +7,7 @@ import           Test.Tasty.Ingredients.FailFast
 import           Evaluator
 import           Parser                          (parse)
 import           Types
+import           Environment
 
 
 evaluateNestedExpression :: TestTree
@@ -100,12 +101,12 @@ assertEvaluateWithoutEnvironment (input, expected) =
   assertEqual description expected result
 
   where description = desc input environment
-        result      = evaluate input environment
-        environment = ""
+        (result, _) = evaluate input environment
+        environment = Environment []
 
-desc :: DiyAST -> String -> String
+desc :: DiyAST -> Environment -> String
 desc input env =
-  "evaluate (" ++ show input ++ ") \"" ++ env ++ "\""
+  "evaluate (" ++ show input ++ ") \"" ++ show env ++ "\""
 
 evaluatingComplexExpressionsTests :: TestTree
 evaluatingComplexExpressionsTests =

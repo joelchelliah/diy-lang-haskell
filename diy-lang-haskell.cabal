@@ -20,6 +20,7 @@ library
   exposed-modules:     Parser
                      , Evaluator
                      , Types
+                     , Environment
                      , ParserUtil
                      , ParserSolution
                      , EvaluatorSolution
@@ -41,6 +42,7 @@ test-suite diy-lang-haskell-test
   other-modules:       Test_1_Parser
                      , Test_2_EvaluatingSimpleExpressions
                      , Test_3_EvaluatingComplexExpressions
+                     , Test_4_WorkingWithVariables
   build-depends:       base
                      , tasty >= 0.11
                      , tasty-hunit
