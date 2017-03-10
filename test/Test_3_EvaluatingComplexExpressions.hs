@@ -4,10 +4,10 @@ import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.Ingredients.FailFast
 
+import           Environment
 import           Evaluator
 import           Parser                          (parse)
 import           Types
-import           Environment
 
 
 evaluateNestedExpression :: TestTree

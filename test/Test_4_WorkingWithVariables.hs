@@ -4,11 +4,11 @@ import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.Ingredients.FailFast
 
+import           Environment
 import           Evaluator
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
 import           Types
-import           Environment
 
 --
 -- Before we go on to evaluating programs using variables, we need
@@ -98,6 +98,7 @@ evaluatingSymbol = testCase
 
     assertEvaluate env (DiySymbol key, val)
 
+
 evaluatingUndefinedSymbol :: TestTree
 evaluatingUndefinedSymbol = testCase
   "\n Test 4.7 - Evaluating an undefined symbol. \n\
@@ -110,9 +111,10 @@ evaluatingUndefinedSymbol = testCase
 
     assertEvaluate env (DiySymbol key, DiyError $ LookUpError key)
 
+
 evaluatingDefine :: TestTree
 evaluatingDefine = testCase
-  "\n Test 4.8 - Evaluating the `define`form. \n\
+  "\n Test 4.8 - Evaluating the `define` form. \n\
   \ The `define` form is used to define new bindings in the environment. \n\
   \ It should result in a change in the environment. What you return from \n\
   \ return from evaluating the definition is not important (although it \n\
@@ -125,6 +127,20 @@ evaluatingDefine = testCase
 
     assertLookUp newEnv key $ DiyInt val
 
+
+evaluatingDefineWithWrongNumberOfArgs :: TestTree
+evaluatingDefineWithWrongNumberOfArgs = testCase
+  "\n Test 4.9 - Evaluating `define` with wrong number of arguments. \n\
+  \ Defines should produce an error, if not given exaclty two arguments. \n\
+  \ This type of check could benefit the other forms we implement as \n\
+  \  well, and you might want to add them elsewhere. However, it gets \n\
+  \  tiresome to keep testing for this, so the tests won't require you to" $ do
+
+    let env      = Environment []
+        expected = DiyError InvalidArgument
+
+    assertEvaluate env (parse "(define x)", expected)
+    assertEvaluate env (parse "(define x 1 2)", expected)
 
 
 assertLookUp :: Environment -> String -> DiyAST -> Assertion
