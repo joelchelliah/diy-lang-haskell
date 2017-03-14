@@ -143,6 +143,44 @@ evaluatingDefineWithWrongNumberOfArgs = testCase
     assertEvaluate env (parse "(define x 1 2)", expected)
 
 
+evaluatingDefineWithNonSymbolAsKey :: TestTree
+evaluatingDefineWithNonSymbolAsKey = testCase
+  "\n Test 4.10 - Evaluating `define` with a non-symbol as key. \n\
+  \ Defines require the first argument to be a symbol" $ do
+
+    let env = Environment []
+
+    assertEvaluate env (parse "(define #t 42)", DiyError InvalidArgument)
+
+
+evaluatingDefineWithExpressionAsArg :: TestTree
+evaluatingDefineWithExpressionAsArg = testCase
+  "\n Test 4.11 - Evaluating `define` with an expresion as argument. \n\
+  \ Defines should evaluate the argument before storing it in \n\
+  \ the environment" $ do
+
+    let oldEnv      = Environment []
+        key         = "x"
+        input       = parse $ "(define " ++ key ++ " (+ 1 41))"
+        (_, newEnv) = evaluate input oldEnv
+
+    assertLookUp newEnv key $ DiyInt 42
+
+
+evaluatingWithLookupAfterDefine :: TestTree
+evaluatingWithLookupAfterDefine = testCase
+  "\n Test 4.12 - Evaluating with lookup after `define`. \n\
+  \ Should look up the value defined in the previous call" $ do
+
+    let oldEnv      = Environment []
+        key         = "foo"
+        input       = parse $ "(define " ++ key ++ " (+ 2 2))"
+        (_, newEnv) = evaluate input oldEnv
+
+    assertEvaluate newEnv (parse "foo", DiyInt 4)
+
+
+
 assertLookUp :: Environment -> String -> DiyAST -> Assertion
 assertLookUp env key expected =
   assertEqual ("lookup " ++ show env ++ " " ++ show key) expected result
@@ -171,4 +209,8 @@ workingWithVariabesTests =
     , evaluatingSymbol
     , evaluatingUndefinedSymbol
     , evaluatingDefine
+    , evaluatingDefineWithWrongNumberOfArgs
+    , evaluatingDefineWithNonSymbolAsKey
+    , evaluatingDefineWithExpressionAsArg
+    , evaluatingWithLookupAfterDefine
     ]
