@@ -24,6 +24,7 @@ library
                      , ParserUtil
                      , ParserSolution
                      , EvaluatorSolution
+                     , EnvironmentSolution
   build-depends:       base >= 4.7 && < 5
   default-language:    Haskell2010
 
