@@ -19,5 +19,5 @@ extend' :: Environment -> (String, DiyAST) -> Environment
 extend' (Environment bindings) binding@(name, _) =
   Environment(binding : uniqueBindings)
 
-  where uniqueBindings = filter unique bindings
-        unique         = (/= name) . fst
+  where uniqueBindings = filter isUnique bindings
+        isUnique       = (/= name) . fst
