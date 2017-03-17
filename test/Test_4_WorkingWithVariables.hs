@@ -4,8 +4,8 @@ import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.Ingredients.FailFast
 
-import           Environment
-import           Evaluator
+import           Environment                     (extend, lookup)
+import           Evaluator                       (evaluate)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
 import           Types
@@ -15,13 +15,13 @@ import           Types
 -- to implement the functionality for storing and looking them up
 -- from our Environment.
 -- It is time to fill in the blanks in the `Environment` type
--- located in `src/Types.hs`.
+-- located in `src/Evaluator.hs`.
 --
 
 simpleLookup :: TestTree
 simpleLookup = testCase
   "\n Test 4.1 - A simple lookup. \n\
-  \ Implement the following function in `src/Evaluator.hs` \n\
+  \ Implement the following function in `src/Evaluator.hs`: \n\
   \ `lookup :: Environment -> String -> DiyAST`"  $ do
 
     let key = "var"
@@ -47,6 +47,7 @@ lookUpMissingVal = testCase
 extendingTheEnvironment :: TestTree
 extendingTheEnvironment = testCase
   "\n Test 4.3 - Extending the environment. \n\
+  \ Implement the `extend` function in `src/Evaluator.hs`. \n\
   \ The `extend` function should return a new environment \n\
   \ extended with the given binding" $ do
 

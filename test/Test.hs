@@ -5,6 +5,7 @@ import           Test_1_Parser
 import           Test_2_EvaluatingSimpleExpressions
 import           Test_3_EvaluatingComplexExpressions
 import           Test_4_WorkingWithVariables
+import           Test_5_AddingFunctionsToTheMix
 
 main :: IO ()
 -- main = defaultMainWithIngredients (map failFast defaultIngredients) tests
@@ -16,4 +17,5 @@ tests = testGroup "DIY Lang Tests"
   , evaluatingSimpleExpressionsTests
   , evaluatingComplexExpressionsTests
   , workingWithVariabesTests
+  , addingFunctionsToTheMixTests
   ]

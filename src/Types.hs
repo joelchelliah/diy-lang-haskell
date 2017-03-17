@@ -11,6 +11,9 @@ data DiyAST = DiySymbol String
             | DiyBool Bool
             | DiyInt Int
             | DiyList [DiyAST]
+            | DiyClosure { func     :: DiyFunction
+                         , localEnv :: Environment
+                         }
             | DiyError DiyErrorType
             deriving (Show, Eq)
 
@@ -26,4 +29,12 @@ data DiyErrorType = IncompleteExpression
 
 -- Represents the environment, holding a list of all
 -- (key, value) bindings created during an evaluation.
-newtype Environment = Environment [(String, DiyAST)] deriving (Show)
+newtype Environment = Environment { bindings :: [(String, DiyAST)]
+                                  } deriving (Show, Eq)
+
+
+-- Represents the function held by the DiyClosure,
+-- consistings of a parameter list and a function body.
+data DiyFunction = DiyFunction { params :: [DiyAST]
+                               , body   :: DiyAST
+                               } deriving (Show, Eq)

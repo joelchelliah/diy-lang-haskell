@@ -44,6 +44,7 @@ test-suite diy-lang-haskell-test
                      , Test_2_EvaluatingSimpleExpressions
                      , Test_3_EvaluatingComplexExpressions
                      , Test_4_WorkingWithVariables
+                     , Test_5_AddingFunctionsToTheMix
   build-depends:       base
                      , tasty >= 0.11
                      , tasty-hunit
