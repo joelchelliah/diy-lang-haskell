@@ -8,6 +8,7 @@ import           Environment                     (extend, lookup)
 import           Evaluator                       (evaluate)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
+import           TestHelper
 import           Types
 
 --
@@ -361,34 +362,6 @@ callingFunctionRecursively = testCase
       , (DiyInt 42, parse "(my-fn 10)")
       ]
 
-
-assertIsClosure :: DiyAST -> Assertion
-assertIsClosure (DiyClosure _ _) = assertBool "is a closure" True
-assertIsClosure exp              = assertFailure $ show exp ++ " is not a closure"
-
-assertClosureFunction :: DiyAST -> DiyFunctionParams -> DiyFunctionBody -> Assertion
-assertClosureFunction (DiyClosure func _) expectedParams expectedBody = do
-  assertEqual "closure function params" expectedParams $ params func
-  assertEqual "closure function body" expectedBody $ body func
-
-assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion
-assertEvaluateWithoutEnvironment (expected, input) =
-  assertEqual description expected result
-
-  where description = descEvaluate input environment
-        (result, _) = evaluate input environment
-        environment = Environment []
-
-assertEvaluateWithEnvironment :: Environment -> (DiyAST, DiyAST) -> Assertion
-assertEvaluateWithEnvironment env (expected, input) =
-  assertEqual description expected result
-
-  where description = descEvaluate input env
-        (result, _) = evaluate input env
-
-descEvaluate :: DiyAST -> Environment -> String
-descEvaluate input env =
-  "evaluate (" ++ show input ++ ") \"" ++ show env ++ "\""
 
 addingFunctionsToTheMixTests :: TestTree
 addingFunctionsToTheMixTests =

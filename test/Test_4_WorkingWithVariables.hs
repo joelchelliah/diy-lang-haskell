@@ -8,6 +8,7 @@ import           Environment                     (extend, lookup)
 import           Evaluator                       (evaluate)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
+import           TestHelper
 import           Types
 
 --
@@ -100,7 +101,7 @@ evaluatingSymbol = testCase
     let (key, val) = ("foo", DiyInt 42)
         env        = Environment [(key, val)]
 
-    assertEvaluate env (DiySymbol key, val)
+    assertEvaluateWithEnvironment env (val, DiySymbol key)
 
 
 evaluatingUndefinedSymbol :: TestTree
@@ -110,10 +111,10 @@ evaluatingUndefinedSymbol = testCase
   \ This test should already be working if you have implemented \n\
   \ the environment correctly" $ do
 
-    let key = "my-missing-val"
-        env = Environment []
+    let key      = "my-missing-val"
+        expected = DiyError $ LookUpError key
 
-    assertEvaluate env (DiySymbol key, DiyError $ LookUpError key)
+    assertEvaluateWithoutEnvironment (expected, DiySymbol key)
 
 
 evaluatingDefine :: TestTree
@@ -140,11 +141,10 @@ evaluatingDefineWithWrongNumberOfArgs = testCase
   \  well, and you might want to add them elsewhere. However, it gets \n\
   \  tiresome to keep testing for this, so the tests won't require you to" $ do
 
-    let env      = Environment []
-        expected = DiyError InvalidArgument
+    let expected = DiyError InvalidArgument
 
-    assertEvaluate env (parse "(define x)", expected)
-    assertEvaluate env (parse "(define x 1 2)", expected)
+    assertEvaluateWithoutEnvironment (expected, parse "(define x)")
+    assertEvaluateWithoutEnvironment (expected, parse "(define x 1 2)")
 
 
 evaluatingDefineWithNonSymbolAsKey :: TestTree
@@ -152,9 +152,9 @@ evaluatingDefineWithNonSymbolAsKey = testCase
   "\n Test 4.10 - Evaluating `define` with a non-symbol as key. \n\
   \ Defines require the first argument to be a symbol" $ do
 
-    let env = Environment []
+    let expected = DiyError InvalidArgument
 
-    assertEvaluate env (parse "(define #t 42)", DiyError InvalidArgument)
+    assertEvaluateWithoutEnvironment (expected, parse "(define #t 42)")
 
 
 evaluatingDefineWithExpressionAsArg :: TestTree
@@ -176,31 +176,13 @@ evaluatingWithLookupAfterDefine = testCase
   "\n Test 4.12 - Evaluating with lookup after `define`. \n\
   \ Should look up the value defined in the previous call" $ do
 
-    let oldEnv      = Environment []
-        key         = "foo"
-        input       = parse $ "(define " ++ key ++ " (+ 2 2))"
-        (_, newEnv) = evaluate input oldEnv
+    let key      = "foo"
+        input    = parse $ "(define " ++ key ++ " (+ 2 2))"
+        (_, env) = evaluate input $ Environment []
+        expected = DiyInt 4
 
-    assertEvaluate newEnv (parse "foo", DiyInt 4)
+    assertEvaluateWithEnvironment env (expected, parse "foo")
 
-
-
-assertLookUp :: Environment -> String -> DiyAST -> Assertion
-assertLookUp env key expected =
-  assertEqual ("lookup " ++ show env ++ " " ++ show key) expected result
-
-  where result = lookup env key
-
-assertEvaluate :: Environment -> (DiyAST, DiyAST) -> Assertion
-assertEvaluate env (input, expected) =
-  assertEqual description expected result
-
-  where description = desc input env
-        (result, _) = evaluate input env
-
-desc :: DiyAST -> Environment -> String
-desc input env =
-  "evaluate (" ++ show input ++ ") \"" ++ show env ++ "\""
 
 workingWithVariabesTests :: TestTree
 workingWithVariabesTests =

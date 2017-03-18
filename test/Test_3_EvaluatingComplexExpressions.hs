@@ -7,6 +7,7 @@ import           Test.Tasty.Ingredients.FailFast
 import           Environment
 import           Evaluator
 import           Parser                          (parse)
+import           TestHelper
 import           Types
 
 
@@ -20,9 +21,10 @@ evaluateNestedExpression = testCase
   \ If this test is failing, make sure that `+`, `>`, and so \n\
   \ on are evaluating their arguments before operating on them"  $ do
 
-    let input = parse "(eq #f (> (- (+ 1 3) (* 2 (mod 7 4))) 4))"
+    let input    = parse "(eq #f (> (- (+ 1 3) (* 2 (mod 7 4))) 4))"
+        expected = DiyBool True
 
-    assertEvaluateWithoutEnvironment (input, DiyBool True)
+    assertEvaluateWithoutEnvironment (expected, input)
 
 
 evaluateBasicIfStatement :: TestTree
@@ -34,12 +36,10 @@ evaluateBasicIfStatement = testCase
   \ evaluated and returned. Otherwise the third and last argument \n\
   \ is evaluated and returned instead" $ do
 
-    let assertEval i = assertEvaluateWithoutEnvironment (i, i)
-
     mapM_ assertEvaluateWithoutEnvironment
-          [ ( parse "(if #t 42 1000)", DiyInt 42   )
-          , ( parse "(if #f 42 1000)", DiyInt 1000 )
-          , ( parse "(if #t #t #f)"  , DiyBool True)
+          [ ( DiyInt 42   , parse "(if #t 42 1000)")
+          , ( DiyInt 1000 , parse "(if #f 42 1000)")
+          , ( DiyBool True, parse "(if #t #t #f)"  )
           ]
 
 
@@ -49,9 +49,10 @@ evaluateOnlyTheCorrectBranch = testCase
   \ The branch of the if statement that is discarded \n\
   \ should never be evaluated" $ do
 
-    let input = parse "(if #f (this should not be evaluated) 42)"
+    let input    = parse "(if #f (this should not be evaluated) 42)"
+        expected = DiyInt 42
 
-    assertEvaluateWithoutEnvironment (input, DiyInt 42)
+    assertEvaluateWithoutEnvironment (expected, input)
 
 
 evaluateIfWithSubExpressions :: TestTree
@@ -60,13 +61,14 @@ evaluateIfWithSubExpressions = testCase
   \ A final test with a more complex if statement. \n\
   \ This test should already be passing if the above ones are" $ do
 
-    let input = parse "\n\
+    let expected = DiyInt 42
+        input    = parse "\n\
     \ (if (> 1 2) \n\
     \     (- 1000 1) \n\
     \     (+ 40 (- 3 1))) \n\
     \"
 
-    assertEvaluateWithoutEnvironment (input, DiyInt 42)
+    assertEvaluateWithoutEnvironment (expected, input)
 
 
 quoteShouldNotEvaluateItsArguments :: TestTree
@@ -93,20 +95,8 @@ quoteShouldNotEvaluateItsArguments = testCase
                            , DiyBool False
                            ]
 
-    assertEvaluateWithoutEnvironment (input, expected)
+    assertEvaluateWithoutEnvironment (expected, input)
 
-
-assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion
-assertEvaluateWithoutEnvironment (input, expected) =
-  assertEqual description expected result
-
-  where description = desc input environment
-        (result, _) = evaluate input environment
-        environment = Environment []
-
-desc :: DiyAST -> Environment -> String
-desc input env =
-  "evaluate (" ++ show input ++ ") \"" ++ show env ++ "\""
 
 evaluatingComplexExpressionsTests :: TestTree
 evaluatingComplexExpressionsTests =

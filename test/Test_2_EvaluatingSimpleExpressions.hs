@@ -7,6 +7,7 @@ import           Test.Tasty.Ingredients.FailFast
 import           Environment
 import           Evaluator
 import           Parser                          (parse)
+import           TestHelper
 import           Types
 
 
@@ -41,7 +42,7 @@ evaluateQuote = testCase
   \ When a call is done to the `quote` form, the argument \n\
   \ should be returned without being evaluated" $ do
 
-    let pairWithQuotedExp exp = (DiyList [ DiySymbol "quote", exp] , exp)
+    let pairWithQuotedExp exp = (exp, DiyList [ DiySymbol "quote", exp])
 
     mapM_ assertEvaluateWithoutEnvironment
         $ pairWithQuotedExp <$>
@@ -64,11 +65,11 @@ evaluateAtomFunction = testCase
   \ before the check is done" $
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(atom #t)"      , DiyBool True )
-        , (parse "(atom #f)"      , DiyBool True )
-        , (parse "(atom 42)"      , DiyBool True )
-        , (parse "(atom 'foo)"    , DiyBool True )
-        , (parse "(atom (1 2 #f))", DiyBool False)
+        [ (DiyBool True,  parse "(atom #t)"      )
+        , (DiyBool True,  parse "(atom #f)"      )
+        , (DiyBool True,  parse "(atom 42)"      )
+        , (DiyBool True,  parse "(atom 'foo)"    )
+        , (DiyBool False, parse "(atom (1 2 #f))")
         ]
 
 
@@ -80,12 +81,12 @@ evaluateEqFunction = testCase
   \ Note that lists are never equal, because lists are not atoms" $
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(eq 1 1)"              , DiyBool True )
-        , (parse "(eq 1 2)"              , DiyBool False)
-        , (parse "(eq 'foo 'foo)"        , DiyBool True )
-        , (parse "(eq 'foo 'bar)"        , DiyBool False)
+        [ (DiyBool True , parse "(eq 1 1)"              )
+        , (DiyBool False, parse "(eq 1 2)"              )
+        , (DiyBool True , parse "(eq 'foo 'foo)"        )
+        , (DiyBool False, parse "(eq 'foo 'bar)"        )
         -- Lists are never equal, because lists are not atoms
-        , (parse "(eq '(1 2 3) '(1 2 3))", DiyBool False)
+        , (DiyBool False, parse "(eq '(1 2 3) '(1 2 3))")
         ]
 
 
@@ -97,41 +98,31 @@ evaluateBasicMathOperators = testCase
   \ the modulo operator" $
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(+ 23 19)", DiyInt  42   )
-        , (parse "(- 2 1)"  , DiyInt  1    )
-        , (parse "(/ 6 2)"  , DiyInt  3    )
-        , (parse "(/ 7 2)"  , DiyInt  3    )
-        , (parse "(mod 7 2)", DiyInt  1    )
-        , (parse "(> 7 2)"  , DiyBool True )
-        , (parse "(> 2 7)"  , DiyBool False)
-        , (parse "(> 4 4)"  , DiyBool False)
+        [ (DiyInt  42   , parse "(+ 23 19)")
+        , (DiyInt  1    , parse "(- 2 1)"  )
+        , (DiyInt  3    , parse "(/ 6 2)"  )
+        , (DiyInt  3    , parse "(/ 7 2)"  )
+        , (DiyInt  1    , parse "(mod 7 2)")
+        , (DiyBool True , parse "(> 7 2)"  )
+        , (DiyBool False, parse "(> 2 7)"  )
+        , (DiyBool False, parse "(> 4 4)"  )
         ]
 
 
 evaluateMathOperatorsOnOtherInput :: TestTree
 evaluateMathOperatorsOnOtherInput = testCase
   "\n Test 2.7 - Evaluating math operators on non-numbers. \n\
-  \ The math operators should only allow numbers as arguments" $
+  \ The math operators should only allow numbers as arguments" $ do
+
+    let expected = DiyError InvalidArgument
 
     mapM_ assertEvaluateWithoutEnvironment
-        [ (parse "(+ 1 'foo)"  , DiyError InvalidArgument)
-        , (parse "(- 1 'foo)"  , DiyError InvalidArgument)
-        , (parse "(/ 1 'foo)"  , DiyError InvalidArgument)
-        , (parse "(mod 1 'foo)", DiyError InvalidArgument)
+        [ (expected, parse "(+ 1 'foo)"  )
+        , (expected, parse "(- 1 'foo)"  )
+        , (expected, parse "(/ 1 'foo)"  )
+        , (expected, parse "(mod 1 'foo)")
         ]
 
-
-assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion
-assertEvaluateWithoutEnvironment (input, expected) =
-  assertEqual description expected result
-
-  where description = desc input environment
-        (result, _) = evaluate input environment
-        environment = Environment []
-
-desc :: DiyAST -> Environment -> String
-desc input env =
-  "evaluate (" ++ show input ++ ") \"" ++ show env ++ "\""
 
 evaluatingSimpleExpressionsTests :: TestTree
 evaluatingSimpleExpressionsTests =
