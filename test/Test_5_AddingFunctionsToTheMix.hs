@@ -23,10 +23,10 @@ lambdaEvaluatesToClosure = testCase
   \ Closures are represented as <DiyClosure DiyFunction Environment> \n\
   \  in our AST"  $ do
 
-    let input = parse "(lambda, (), 42)"
-        env   = Environment []
+    let lambda = parse "(lambda, (), 42)"
+        env    = Environment []
 
-    assertIsClosure . fst $ evaluate input env
+    assertIsClosure . fst $ evaluate lambda env
 
 
 closureKeepsCopyOfEnvironment :: TestTree
@@ -37,9 +37,9 @@ closureKeepsCopyOfEnvironment = testCase
   \ access to the environment from when the function was created \n\
   \ in order to resolve all free variables" $ do
 
-    let input        = parse "(lambda, (), 42)"
+    let lambda       = parse "(lambda, (), 42)"
         env          = Environment [("foo", DiyInt 42)]
-        (closure, _) = evaluate input env
+        (closure, _) = evaluate lambda env
 
     assertEqual "Should be the same environment" env $ localEnv closure
 
@@ -50,11 +50,10 @@ closureHoldsFunction = testCase
   \ The closure contains a parameter list and a function body. They \n\
   \ are represented as a <DiyFunction [DiyAST] DiyAST> in our AST" $ do
 
-    let input          = parse "(lambda (x y) (+ x y))"
-        env            = Environment []
-        (closure, _)   = evaluate input env
-        expectedParams = DiyList [ DiySymbol "x", DiySymbol "y" ]
-        expectedBody   = DiyList [ DiySymbol "+", DiySymbol "x", DiySymbol "y" ]
+    let lambda         = parse "(lambda (x y) (+ x y))"
+        (closure, _)   = evaluate lambda $ Environment []
+        expectedParams = [ DiySymbol "x", DiySymbol "y" ]
+        expectedBody   = [ DiySymbol "+", DiySymbol "x", DiySymbol "y" ]
 
     assertIsClosure closure
     assertClosureFunction closure expectedParams expectedBody
@@ -66,10 +65,9 @@ lambdaArgsAreLists = testCase
   \ The parameters of a `lambda` should be a list. \n\
   \ If not, then an error should be produced" $ do
 
-    let input       = parse "(lambda not-a-list (+ x y))"
-        env         = Environment []
+    let lambda      = parse "(lambda not-a-list (+ x y))"
         expected    = DiyError InvalidArgument
-        (result, _) = evaluate input env
+        (result, _) = evaluate lambda $ Environment []
 
     assertEqual "Invalid if lambda params is not a list" expected result
 
@@ -80,10 +78,9 @@ lambdaExpectsTwoArgs = testCase
   \ The `lambda` form should produce an error if it's not \n\
   \ given exactly two arguments" $ do
 
-    let input       = parse "(lambda (foo) (bar) (baz))"
-        env         = Environment []
+    let lambda      = parse "(lambda (foo) (bar) (baz))"
         expected    = DiyError InvalidArgument
-        (result, _) = evaluate input env
+        (result, _) = evaluate lambda $ Environment []
 
     assertEqual "Invalid if not exactly two arguments" expected result
 
@@ -97,9 +94,8 @@ lambdaShouldNotEvaluateBody = testCase
   \ holding the function body. The body should not be evaluated \n\
   \ before the function is called" $ do
 
-    let input        = parse "(lambda (x) (body ((that) would never) work))"
-        env          = Environment []
-        (closure, _) = evaluate input env
+    let lambda       = parse "(lambda (x) (body ((that) would never) work))"
+        (closure, _) = evaluate lambda $ Environment []
 
     assertIsClosure closure
 
@@ -116,90 +112,151 @@ evaluateCallToClosure = testCase
   \ When evaluating a closure with no arguments or free \n\
   \ variables, simply evaluate and return the function body" $ do
 
-    let key = "my-missing-val"
-        env = Environment []
+    let lambda       = parse "(lambda () (+ 1 2))"
+        expected     = DiyInt 3
+        (closure, _) = evaluate lambda $ Environment []
 
-    assertEvaluate env (DiySymbol key, DiyError $ LookUpError key)
-
-
-evaluatingDefine :: TestTree
-evaluatingDefine = testCase
-  "\n Test 4.8 - Evaluating the `define` form. \n\
-  \ The `define` form is used to define new bindings in the environment. \n\
-  \ It should result in a change in the environment. What you return from \n\
-  \ return from evaluating the definition is not important (although it \n\
-  \ affects what is printed in the REPL)" $ do
-
-    let (key, val)  = ("x", 1000)
-        input       = parse $ "(define " ++ key ++ " " ++ show val ++ ")"
-        oldEnv      = Environment []
-        (_, newEnv) = evaluate input oldEnv
-
-    assertLookUp newEnv key $ DiyInt val
+    assertEvaluateWithoutEnvironment (expected, closure)
 
 
-evaluatingDefineWithWrongNumberOfArgs :: TestTree
-evaluatingDefineWithWrongNumberOfArgs = testCase
-  "\n Test 4.9 - Evaluating `define` with wrong number of arguments. \n\
-  \ Defines should produce an error, if not given exaclty two arguments. \n\
-  \ This type of check could benefit the other forms we implement as \n\
-  \  well, and you might want to add them elsewhere. However, it gets \n\
-  \  tiresome to keep testing for this, so the tests won't require you to" $ do
+evaluateCallToClosureWithArgs :: TestTree
+evaluateCallToClosureWithArgs = testCase
+  "\n Test 5.8 - Evaluating a call to a closure with arguments. \n\
+  \ The function body must be evaluated in an environment \n\
+  \ where the parameters are bound. \n\
+  \ Create an environment where the function parameters \n\
+  \ (which are stored in the closure) are bound to the actual \n\
+  \ argument values in the function call. Use this environment \n\
+  \ when evaluating the function body" $ do
 
-    let env      = Environment []
-        expected = DiyError InvalidArgument
+    let lambda       = parse "(lambda (a b) (+ a b))"
+        (closure, _) = evaluate lambda $ Environment []
+        expected     = DiyInt 9
+        input        = DiyList [ closure
+                               , DiyInt 4
+                               , DiyInt 5
+                               ]
 
-    assertEvaluate env (parse "(define x)", expected)
-    assertEvaluate env (parse "(define x 1 2)", expected)
-
-
-evaluatingDefineWithNonSymbolAsKey :: TestTree
-evaluatingDefineWithNonSymbolAsKey = testCase
-  "\n Test 4.10 - Evaluating `define` with a non-symbol as key. \n\
-  \ Defines require the first argument to be a symbol" $ do
-
-    let env = Environment []
-
-    assertEvaluate env (parse "(define #t 42)", DiyError InvalidArgument)
+    assertEvaluateWithoutEnvironment (expected, input)
 
 
-evaluatingDefineWithExpressionAsArg :: TestTree
-evaluatingDefineWithExpressionAsArg = testCase
-  "\n Test 4.11 - Evaluating `define` with an expresion as argument. \n\
-  \ Defines should evaluate the argument before storing it in \n\
-  \ the environment" $ do
+creatingClosureWithEnv :: TestTree
+creatingClosureWithEnv = testCase
+  "\n Test 5.9 - Creating a closure with an existing environment. \n\
+  \ The function parameters must properly shadow the \n\
+  \ outer scope's bindings. \n\
+  \ When the same bindings exist in both the environment and the \n\
+  \ function parameters, the function parameters must be prioritized \n\
+  \ over the ones in the environment" $ do
 
-    let oldEnv      = Environment []
-        key         = "x"
-        input       = parse $ "(define " ++ key ++ " (+ 1 41))"
-        (_, newEnv) = evaluate input oldEnv
+    let lambda       = parse "(lambda (a b) (+ a b))"
+        env          = Environment [ ("a", DiyInt 42)
+                                   , ("b", DiySymbol "foo")
+                                   ]
+        (closure, _) = evaluate lambda env
+        expected     = DiyInt 9
+        input        = DiyList [ closure
+                               , DiyInt 4
+                               , DiyInt 5
+                               ]
 
-    assertLookUp newEnv key $ DiyInt 42
+    assertEvaluateWithEnvironment env (expected, input)
 
 
-evaluatingWithLookupAfterDefine :: TestTree
-evaluatingWithLookupAfterDefine = testCase
-  "\n Test 4.12 - Evaluating with lookup after `define`. \n\
-  \ Should look up the value defined in the previous call" $ do
+callToClosureShouldEvaluateArgs :: TestTree
+callToClosureShouldEvaluateArgs = testCase
+  "\n Test 5.10 - Call to closure should evaluate all arguments. \n\
+  \ When a function is applied, the arguments should be evaluated \n\
+  \ before being bound to the parameter names" $ do
 
-    let oldEnv      = Environment []
-        key         = "foo"
-        input       = parse $ "(define " ++ key ++ " (+ 2 2))"
-        (_, newEnv) = evaluate input oldEnv
+    let lambda       = parse "(lambda (a) (+ a 5))"
+        (closure, _) = evaluate lambda $ Environment []
+        expected     = DiyInt 25
+        input        = DiyList [ closure
+                               , parse "(if #f 0 (+ 10 10))"
+                               ]
 
-    assertEvaluate newEnv (parse "foo", DiyInt 4)
+    assertEvaluateWithoutEnvironment (expected, input)
 
+
+evaluateCallToClosureWithFreeVariables :: TestTree
+evaluateCallToClosureWithFreeVariables = testCase
+  "\n Test 5.11 - Call to closure with free variables. \n\
+  \ The body should be evaluated in the environment from the closure. \n\
+  \ The function's free variables (i.e. those not specified as part \n\
+  \ of the parameter list) should be looked up in the environment \n\
+  \ from where the function was defined. This is the environment \n\
+  \ included in the closure. Make sure this environment is used when \n\
+  \ evaluating the body" $ do
+
+    let lambda       = parse "(lambda (x) (+ x y))"
+        env          = Environment [("y", DiyInt 1)]
+        (closure, _) = evaluate lambda env
+        outerEnv     = Environment [("y", DiyInt 2)]
+        expected     = DiyInt 1
+        input        = DiyList [ closure
+                               , DiyInt 0
+                               ]
+
+    assertEvaluateWithEnvironment outerEnv (expected, input)
+
+
+-- Now we're able to evaluate ASTs with closures as the first element. But normally
+-- the closures don't just happen to be there all by themselves. Generally we'll
+-- find some expression, evaluate it to a closure, and then evaluate a new AST with
+-- the closure just like we did above.
+--
+-- (some-exp arg1 arg2 ...) -> (closure arg1 arg2 ...) -> result-of-function-call
+
+
+callingSimpleFunctionInEnvironment :: TestTree
+callingSimpleFunctionInEnvironment = testCase
+  "\n Test 5.12 - Calling a simple function in the environment. \n\
+  \ A call to a symbol corresponds to a call to its value in the \n\
+  \  environment. \n\
+  \ When a symbol is the first element of the AST list, it is \n\
+  \ resolved to its value in the environment (which should be a \n\
+  \ function closure). An AST with the variables replaced with \n\
+  \ its value should then be evaluated instead" $ do
+
+    let defineAddFunc   = parse "(define add (lambda (x y) (+ x y)))"
+        (function, env) = evaluate defineAddFunc $ Environment []
+
+    assertIsClosure $ lookup env "add"
+
+    let expected = DiyInt 3
+        input    = parse "(add 1 2)"
+
+    assertEvaluateWithEnvironment env (expected, input)
 
 
 assertIsClosure :: DiyAST -> Assertion
 assertIsClosure (DiyClosure _ _) = assertBool "is a closure" True
 assertIsClosure exp              = assertFailure $ show exp ++ " is not a closure"
 
-assertClosureFunction :: DiyAST -> DiyAST -> DiyAST -> Assertion
-assertClosureFunction closure expectedParams expectedBody = do
-  assertEqual "closure function params" expectedParams $ params closure
-  assertEqual "closure function body" expectedBodyParams $ body closure
+assertClosureFunction :: DiyAST -> DiyFunctionParams -> DiyFunctionBody -> Assertion
+assertClosureFunction (DiyClosure func _) expectedParams expectedBody = do
+  assertEqual "closure function params" expectedParams $ params func
+  assertEqual "closure function body" expectedBody $ body func
 
+assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion
+assertEvaluateWithoutEnvironment (expected, input) =
+  assertEqual description expected result
+
+  where description = descEvaluate input environment
+        (result, _) = evaluate input environment
+        environment = Environment []
+
+assertEvaluateWithEnvironment :: Environment -> (DiyAST, DiyAST) -> Assertion
+assertEvaluateWithEnvironment env (expected, input) =
+  assertEqual description expected result
+
+  where description = descEvaluate input env
+        (result, _) = evaluate input env
+
+descEvaluate :: DiyAST -> Environment -> String
+descEvaluate input env =
+  "evaluate (" ++ show input ++ ") \"" ++ show env ++ "\""
 
 addingFunctionsToTheMixTests :: TestTree
 addingFunctionsToTheMixTests =
@@ -210,10 +267,11 @@ addingFunctionsToTheMixTests =
     , lambdaArgsAreLists
     , lambdaExpectsTwoArgs
     , lambdaShouldNotEvaluateBody
-    , evaluatingUndefinedSymbol
-    , evaluatingDefine
-    , evaluatingDefineWithWrongNumberOfArgs
-    , evaluatingDefineWithNonSymbolAsKey
-    , evaluatingDefineWithExpressionAsArg
+    , evaluateCallToClosure
+    , evaluateCallToClosureWithArgs
+    , creatingClosureWithEnv
+    , callToClosureShouldEvaluateArgs
+    , evaluateCallToClosureWithFreeVariables
+    , callingSimpleFunctionInEnvironment
     , evaluatingWithLookupAfterDefine
     ]

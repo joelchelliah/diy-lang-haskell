@@ -33,8 +33,18 @@ newtype Environment = Environment { bindings :: [(String, DiyAST)]
                                   } deriving (Show, Eq)
 
 
+-- The function types below will be useful when doing <part 5>.
+-- Feel free to ignore them until then.
+
+
 -- Represents the function held by the DiyClosure,
 -- consistings of a parameter list and a function body.
-data DiyFunction = DiyFunction { params :: [DiyAST]
-                               , body   :: DiyAST
+data DiyFunction = DiyFunction { params :: DiyFunctionParams
+                               , body   :: DiyFunctionBody
                                } deriving (Show, Eq)
+
+
+-- Some helpful aliases for distinguishing the
+--  closure's function params, and function body.
+type DiyFunctionParams = [DiyAST]
+type DiyFunctionBody = [DiyAST]
