@@ -23,7 +23,14 @@ data DiyAST = DiySymbol String
 data DiyErrorType = IncompleteExpression
                   | ExpressionTooLarge
                   | InvalidArgument
+                  -- Errors related the environment
                   | LookUpError String
+                  -- Errors related to function calls
+                  | NotAFunction
+                  | WrongNumberOfFunctionArguments { expected :: Int
+                                                   , received :: Int
+                                                   }
+                  | EmptyFunctionCall
                  deriving (Show, Eq)
 
 

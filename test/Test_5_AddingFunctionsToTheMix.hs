@@ -230,6 +230,138 @@ callingSimpleFunctionInEnvironment = testCase
     assertEvaluateWithEnvironment env (expected, input)
 
 
+callingLambdasDirectly :: TestTree
+callingLambdasDirectly = testCase
+  "\n Test 5.13 - Should be possible to define and call functions directly. \n\
+  \ A lambda definition in the call position of an AST should \n\
+  \  be evaluated, and then evaluated again, as before" $ do
+
+    let input    = parse "((lambda (x) x) 42)"
+        expected = DiyInt 42
+
+    assertEvaluateWithoutEnvironment (expected, input)
+
+
+callingComplexExpressionWhichEvaluatesToFunction :: TestTree
+callingComplexExpressionWhichEvaluatesToFunction = testCase
+  "\n Test 5.14 - Calling a complex expression that evaluates to a function. \n\
+  \ ASTs that are lists beginning with anything except atoms or symbols, \n\
+  \ should be evaluated and then called. \n\
+  \ Here, a call is done to the if-expression. The `if` should be evaluated, \n\
+  \ which results in a `lambda` expression. The lambda should be evaluated, \n\
+  \ giving a closure. The result is an AST with a closure as the first \n\
+  \ element, which we already know how to evaluate" $ do
+
+    let env      = Environment [("y", DiyInt 3)]
+        expected = DiyInt 5
+        input    = parse "\n\
+        \((if #f \n\
+        \     wont-evaluate-this-branch\n\
+        \     (lambda (x) (+ x y)))\n\
+        \ 2)"
+
+    assertEvaluateWithEnvironment env (expected, input)
+
+
+-- Now that we have the happy cases working, let's see what should happen when
+-- function calls are done incorrectly.
+
+
+callingAnAtomProducesError :: TestTree
+callingAnAtomProducesError = testCase
+  "\n Test 5.15 - Calling an atom is just not right. \n\
+  \ A function call to a non-function should produce a \n\
+  \ <DiyError NotAFunction> error" $ do
+
+    let expected = DiyError NotAFunction
+
+    mapM_ assertEvaluateWithoutEnvironment
+      [ (expected, parse "(#t 'foo 'bar)")
+      , (expected, parse "(42)"          )
+      ]
+
+
+argumentsToFunctionsAreEvaluated :: TestTree
+argumentsToFunctionsAreEvaluated = testCase
+  "\n Test 5.16 - Arguments passed to functions should be evaluated. \n\
+  \ We should accept parameters that are produced through function \n\
+  \ calls. Check if you are properly evaluating the passed \n\
+  \ function arguments" $ do
+
+    let expected = DiyInt 3
+        input    = parse "((lambda (x) x) (+ 1 2))"
+
+    assertEvaluateWithoutEnvironment (expected, input)
+
+
+callingWithWrongNumberOfArguments :: TestTree
+callingWithWrongNumberOfArguments = testCase
+  "\n Test 5.17 - Calling with wrong number of arguments. \n\
+  \ Functions should produce a <DiyError WrongNumberOfFunctionArguments> \n\
+  \ error when called with the wrong number of arguments" $ do
+
+    let defineFn = parse "(define fn (lambda (p1 p2) 'whatever))"
+        (_, env) = evaluate defineFn $ Environment []
+        expected = DiyError $ WrongNumberOfFunctionArguments 2 3
+        input    = parse "(fn 1 2 3)"
+
+    assertEvaluateWithEnvironment env (expected, input)
+
+
+callingNothing :: TestTree
+callingNothing = testCase
+  "\n Test 5.18 - Calling nothing should fail. \n\
+  \ Calling nothing at all should produce the error: \n\
+  \ <DiyError EmptyFunctionCall> \n\
+  \ Remember to quote empty data lists" $ do
+
+    let expected = DiyError EmptyFunctionCall
+        input    = parse "()"
+
+    assertEvaluateWithoutEnvironment (expected, input)
+
+
+argumentsAreEvaluatedInCorrectEnvironment :: TestTree
+argumentsAreEvaluatedInCorrectEnvironment = testCase
+  "\n Test 5.19 - Arguments are evaluated in the correct environment. \n\
+  \ Function arguments should be evaluated in the environment \n\
+  \ where the function is called, and not in the environment captured \n\
+  \ by the function" $ do
+
+    let defineFoo  = parse "(define foo (lambda (x) x))"
+        (foo, env) = evaluate defineFoo $ Environment [("x", DiyInt 3)]
+        newEnv     = extend env ("x", DiyInt 4)
+        expected   = DiyInt 5
+        input      = parse "(foo (+ x 1))"
+
+    assertEvaluateWithEnvironment newEnv (expected, input)
+
+
+-- One final test to see that recursive functions are working as expected.
+-- This should already be working by now! :)
+
+
+callingFunctionRecursively :: TestTree
+callingFunctionRecursively = testCase
+  "\n Test 5.20 - Calling a function recursively. \n\
+  \ A named function should be included in the environment \n\
+  \ where it is evaluated" $ do
+
+    let defineFn  = parse "\n\
+    \(define my-fn\n\
+    \        ;; A meaningless, but recursive, function\n\
+    \        (lambda (x)\n\
+    \            (if (eq x 0)\n\
+    \                42\n\
+    \                (my-fn (- x 1)))))"
+        (fn, env) = evaluate defineFn $ Environment []
+
+    mapM_ (assertEvaluateWithEnvironment env)
+      [ (DiyInt 42, parse "(my-fn 0)")
+      , (DiyInt 42, parse "(my-fn 10)")
+      ]
+
+
 assertIsClosure :: DiyAST -> Assertion
 assertIsClosure (DiyClosure _ _) = assertBool "is a closure" True
 assertIsClosure exp              = assertFailure $ show exp ++ " is not a closure"
@@ -273,5 +405,12 @@ addingFunctionsToTheMixTests =
     , callToClosureShouldEvaluateArgs
     , evaluateCallToClosureWithFreeVariables
     , callingSimpleFunctionInEnvironment
-    , evaluatingWithLookupAfterDefine
+    , callingLambdasDirectly
+    , callingComplexExpressionWhichEvaluatesToFunction
+    , callingAnAtomProducesError
+    , argumentsToFunctionsAreEvaluated
+    , callingWithWrongNumberOfArguments
+    , callingNothing
+    , argumentsAreEvaluatedInCorrectEnvironment
+    , callingFunctionRecursively
     ]
