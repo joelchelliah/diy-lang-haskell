@@ -37,7 +37,9 @@ evaluate' ast env =
         evaluateList [DiySymbol "/", e1, e2]        = (calc divi e1 e2, env)
         evaluateList [DiySymbol "mod", e1, e2]      = (calc modu e1 e2, env)
         evaluateList [DiySymbol ">", e1, e2]        = (calc gt   e1 e2, env)
-        evaluateList list                           = (DiyList list, env)
+        evaluateList list@(DiySymbol _ : _)         = evaluateListStartingWithSymbol list
+        evaluateList list@(DiyList _ : _)           = evaluateListStartingWithList list
+        evaluateList other                          = (DiyError NotAFunction, env)
 
 
         -- Function evaluation :
@@ -48,9 +50,24 @@ evaluate' ast env =
         evaluateFunctionCall func@(DiyFunction fParams fBody) fEnv args =
           evaluate' fBody newEnv
 
-          where newEnv   = foldr (flip extend) fEnv bindings
-                bindings = zip (val <$> fParams) args
+          where newEnv            = foldr (flip extend) fEnv bindings
+                bindings          = zip (val <$> fParams) (eval <$> args)
                 val (DiySymbol v) = v
+
+
+        -- Special list evaluations :
+
+        evaluateListStartingWithSymbol (DiySymbol key : rest) =
+          evaluate' exp env
+
+          where exp = DiyList $ val : rest
+                val = lookup env key
+
+        evaluateListStartingWithList (DiyList list : rest) =
+          evaluate' exp env
+
+          where exp      = DiyList $ def : rest
+                (def, _) = evaluateList list
 
 
         -- `atom` :
