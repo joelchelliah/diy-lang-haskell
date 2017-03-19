@@ -54,4 +54,4 @@ data DiyFunction = DiyFunction { params :: DiyFunctionParams
 -- Some helpful aliases for distinguishing the
 --  closure's function params, and function body.
 type DiyFunctionParams = [DiyAST]
-type DiyFunctionBody = [DiyAST]
+type DiyFunctionBody = DiyAST

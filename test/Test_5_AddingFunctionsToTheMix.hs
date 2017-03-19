@@ -24,7 +24,7 @@ lambdaEvaluatesToClosure = testCase
   \ Closures are represented as <DiyClosure DiyFunction Environment> \n\
   \  in our AST"  $ do
 
-    let lambda = parse "(lambda, (), 42)"
+    let lambda = parse "(lambda () 42)"
         env    = Environment []
 
     assertIsClosure . fst $ evaluate lambda env
@@ -38,7 +38,7 @@ closureKeepsCopyOfEnvironment = testCase
   \ access to the environment from when the function was created \n\
   \ in order to resolve all free variables" $ do
 
-    let lambda       = parse "(lambda, (), 42)"
+    let lambda       = parse "(lambda () 42)"
         env          = Environment [("foo", DiyInt 42)]
         (closure, _) = evaluate lambda env
 
@@ -54,7 +54,7 @@ closureHoldsFunction = testCase
     let lambda         = parse "(lambda (x y) (+ x y))"
         (closure, _)   = evaluate lambda $ Environment []
         expectedParams = [ DiySymbol "x", DiySymbol "y" ]
-        expectedBody   = [ DiySymbol "+", DiySymbol "x", DiySymbol "y" ]
+        expectedBody   = DiyList [ DiySymbol "+", DiySymbol "x", DiySymbol "y" ]
 
     assertIsClosure closure
     assertClosureFunction closure expectedParams expectedBody

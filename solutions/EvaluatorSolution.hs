@@ -10,14 +10,20 @@ import           Types
 evaluate' :: DiyAST -> Environment -> (DiyAST, Environment)
 evaluate' ast env =
   case ast of
-    DiyList list  -> evaluateList list
-    DiySymbol key -> (lookup env key, env)
-    expression    -> (expression, env)
+    DiyClosure cFunc cEnv -> evaluateFunction cFunc cEnv
+    DiyList    list       -> evaluateList list
+    DiySymbol  key        -> (lookup env key, env)
+    expression            -> (expression, env)
 
   where eval exp =
           let (result, _) = evaluate' exp env
           in result
 
+
+        -- List evaluation :
+
+        evaluateList [DiySymbol "lambda", e1, e2]   = lambda e1 e2
+        evaluateList (DiySymbol "lambda" : _)       = (DiyError InvalidArgument, env)
         evaluateList [DiySymbol "define", e1, e2]   = define e1 e2
         evaluateList (DiySymbol "define" : _)       = (DiyError InvalidArgument, env)
         evaluateList [DiySymbol "quote", exp]       = (exp, env)
@@ -31,6 +37,12 @@ evaluate' ast env =
         evaluateList [DiySymbol "mod", e1, e2]      = (calc modu e1 e2, env)
         evaluateList [DiySymbol ">", e1, e2]        = (calc gt   e1 e2, env)
         evaluateList list                           = (DiyList list, env)
+
+
+        -- Function evaluation :
+
+        evaluateFunction (DiyFunction fArgs fBody) fEnv =
+          evaluate' fBody env
 
 
         -- `atom` :
@@ -79,7 +91,18 @@ evaluate' ast env =
         -- `define` :
 
         define (DiySymbol key) exp = (value, newEnv)
+
           where value  = eval exp
                 newEnv = extend env (key, value)
 
         define _ _ = (DiyError InvalidArgument, env)
+
+
+        -- `lambda` :
+
+        lambda (DiyList fArgs) fBody =
+          (DiyClosure func env, env)
+
+          where func = DiyFunction fArgs fBody
+
+        lambda _ _ = (DiyError InvalidArgument, env)
