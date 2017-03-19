@@ -16,7 +16,16 @@ import           Types
 --
 
 
--- Assertions for validating the result of an evaluation given a valid AST.
+-- Assertions for validating the result of parsing an input string.
+
+assertParse :: (DiyAST, String) -> Assertion
+assertParse (expected, input) =
+  assertEqual (descParse input) expected $ parse input
+
+descParse :: String -> String
+descParse input = "parse \"" ++ input ++ "\""
+
+-- Assertions for validating the result of evaluating an AST.
 -- Both with and without an already existing environment.
 
 assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion

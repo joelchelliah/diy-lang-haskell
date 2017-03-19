@@ -5,51 +5,56 @@ import           Test.Tasty.HUnit
 import           Test.Tasty.Ingredients.FailFast
 
 import           Parser
+import           TestHelper
 import           Types
 
 
 parseSymbol :: TestTree
 parseSymbol = testCase
   "\n Test 1.1 - Parsing a single symbol. \n\
-  \ Symbols are represented by strings. Parsing a single symbol \n\
-  \ should result in an AST consisting of a <DiySymbol String>" $ do
+  \ Symbols are represented by DiySymbols in the AST. Parsing a single \n\
+  \ symbol should result in an AST consisting of a <DiySymbol String>" $ do
 
     let input = "foo"
+        expected = DiySymbol input
 
-    assertEqual (desc input) (DiySymbol input) $ parse input
+    assertParse (expected, input)
 
 
 parseBoolean :: TestTree
 parseBoolean = testCase
   "\n Test 1.2 - Parsing a single boolean. \n\
   \ Booleans are the special symbols #t and #f. In the AST \n\
-  \ they are represented as <DiyBool Bool>" $ do
+  \ they are represented as <DiyBool Bool>" $
 
-  assertEqual (desc "#t") (DiyBool True)  $ parse "#t"
-  assertEqual (desc "#f") (DiyBool False) $ parse "#f"
+  mapM_ assertParse
+    [ (DiyBool True, "#t")
+    , (DiyBool False, "#f")
+    ]
 
 
 parseInteger :: TestTree
 parseInteger = testCase
   "\n Test 1.3 - Parsing a single integer. \n\
   \ Integers are represented in the AST as <DiyInt Int>. \n\
-  \ Tip: The Data.Char library has a handy `isDigit` function" $ do
+  \ Tip: The Data.Char library has a handy `isDigit` function" $
 
-  assertEqual (desc "42")   (DiyInt 42)    $ parse "42"
-  assertEqual (desc "1337") (DiyInt 1337)  $ parse "1337"
+  mapM_ assertParse
+    [ (DiyInt 42, "42")
+    , (DiyInt 1337, "1337")
+    ]
 
 
 parseListOfSymbols :: TestTree
 parseListOfSymbols = testCase
   "\n Test 1.4 - Parsing a list of symbols. \n\
   \ A list is represented by a number of elements surrounded by parens. \n\
-  \ <DiyList [DiyAST]> are used to represent lists as ASTs" $ do
+  \ <DiyList [DiyAST]> are used to represent lists as ASTs" $
 
-  let expectedList  = DiyList $ DiySymbol <$> ["foo", "bar", "baz"]
-      expectedEmpty = DiyList []
-
-  assertEqual (desc "(foo bar baz)") expectedList  $ parse "(foo bar baz)"
-  assertEqual (desc "()")            expectedEmpty $ parse "()"
+  mapM_ assertParse
+    [ (DiyList $ DiySymbol <$> ["foo", "bar", "baz"], "(foo bar baz)")
+    , (DiyList [], "()")
+    ]
 
 
 parseListOfMixedTypes :: TestTree
@@ -64,7 +69,7 @@ parseListOfMixedTypes = testCase
                          , DiyInt 123
                          ]
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseNestedLists :: TestTree
@@ -84,7 +89,7 @@ parseNestedLists = testCase
                           ]
                 ]
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseErrorWhenMissingParen :: TestTree
@@ -96,7 +101,7 @@ parseErrorWhenMissingParen = testCase
   let input    = "(foo (bar x y)"
       expected = DiyError IncompleteExpression
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseErrorWhenExtraParen :: TestTree
@@ -109,8 +114,7 @@ parseErrorWhenExtraParen = testCase
   let input    = "(foo (bar x y)))"
       expected = DiyError ExpressionTooLarge
 
-  assertEqual (desc input) expected $ parse input
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseWithExtraWhitespace :: TestTree
@@ -126,7 +130,7 @@ parseWithExtraWhitespace = testCase
                          , DiySymbol "whitespace"
                          ]
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseComments :: TestTree
@@ -154,7 +158,7 @@ parseComments = testCase
                           ]
                 ]
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseLargerExamples :: TestTree
@@ -195,7 +199,7 @@ parseLargerExamples = testCase
                           ]
                 ]
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseQuote :: TestTree
@@ -214,7 +218,7 @@ parseQuote = testCase
                                    ]
                          ]
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseNestedQuotes :: TestTree
@@ -227,7 +231,7 @@ parseNestedQuotes = testCase
       expected =
         quote . quote . quote . quote $ DiySymbol "foo"
 
-  assertEqual (desc input) expected $ parse input
+  assertParse (expected, input)
 
 
 parseCrazyQuoteCombo :: TestTree
@@ -236,12 +240,10 @@ parseCrazyQuoteCombo = testCase
   \ One final test to see that quote expansion works" $ do
 
   let input = "'(this ''''(makes ''no) 'sense)"
+      desc  = "unparse $ " ++ descParse input
 
-  assertEqual ("unparse $ " ++ desc input) input . unparse $ parse input
+  assertEqual desc input . unparse $ parse input
 
-
-desc :: String -> String
-desc input = "parse \"" ++ input ++ "\""
 
 parsingTests :: TestTree
 parsingTests = testGroup "- Parsing -"
