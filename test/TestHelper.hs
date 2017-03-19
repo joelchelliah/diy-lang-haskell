@@ -45,7 +45,7 @@ assertEvaluateWithEnvironment env (expected, input) =
 
 descEvaluate :: DiyAST -> Environment -> String
 descEvaluate input env =
-  "evaluate (" ++ show input ++ ") \"" ++ show env ++ "\""
+  "evaluate (" ++ show input ++ ") (" ++ show env ++ ")"
 
 
 -- Assertions for validating the environment.

@@ -22,6 +22,7 @@ evaluate' ast env =
 
         -- List evaluation :
 
+        evaluateList (DiyClosure cFunc cEnv : args) = evaluateFunctionCall cFunc cEnv args
         evaluateList [DiySymbol "lambda", e1, e2]   = lambda e1 e2
         evaluateList (DiySymbol "lambda" : _)       = (DiyError InvalidArgument, env)
         evaluateList [DiySymbol "define", e1, e2]   = define e1 e2
@@ -42,7 +43,14 @@ evaluate' ast env =
         -- Function evaluation :
 
         evaluateFunction (DiyFunction fArgs fBody) fEnv =
-          evaluate' fBody env
+          evaluate' fBody fEnv
+
+        evaluateFunctionCall func@(DiyFunction fParams fBody) fEnv args =
+          evaluate' fBody newEnv
+
+          where newEnv   = foldr (flip extend) fEnv bindings
+                bindings = zip (val <$> fParams) args
+                val (DiySymbol v) = v
 
 
         -- `atom` :
@@ -69,8 +77,9 @@ evaluate' ast env =
         -- math operators :
 
         calc op e1@(DiyInt _) e2@(DiyInt _) = e1 `op` e2
-        calc op e1@(DiyList _) e2           = calc op (eval e1) e2
-        calc op e1 e2@(DiyList _)           = calc op e1 (eval e2)
+        calc op e1 e2
+          | shouldEval e1 = calc op (eval e1) e2
+          | shouldEval e2 = calc op e1 (eval e2)
         calc _ _ _                          = DiyError InvalidArgument
 
         plus (DiyInt x) (DiyInt y) = DiyInt  $ x + y
@@ -106,3 +115,10 @@ evaluate' ast env =
           where func = DiyFunction fArgs fBody
 
         lambda _ _ = (DiyError InvalidArgument, env)
+
+
+        -- aux :
+
+        shouldEval (DiyList _)   = True
+        shouldEval (DiySymbol _) = True
+        shouldEval _             = False
