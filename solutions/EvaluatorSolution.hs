@@ -22,24 +22,23 @@ evaluate' ast env =
 
         -- List evaluation :
 
-        evaluateList (DiyClosure cFunc cEnv : args) = evaluateFunctionCall cFunc cEnv args
-        evaluateList [DiySymbol "lambda", e1, e2]   = lambda e1 e2
-        evaluateList (DiySymbol "lambda" : _)       = (DiyError InvalidArgument, env)
-        evaluateList [DiySymbol "define", e1, e2]   = define e1 e2
-        evaluateList (DiySymbol "define" : _)       = (DiyError InvalidArgument, env)
-        evaluateList [DiySymbol "quote", exp]       = (exp, env)
-        evaluateList [DiySymbol "atom", exp]        = (isAtom exp, env)
-        evaluateList [DiySymbol "eq", e1, e2]       = (isEqual e1 e2, env)
+        evaluateList [DiySymbol sym, e]
+          | "quote" == sym = (e, env)
+          | "atom" == sym  = (isAtom e, env)
+        evaluateList [DiySymbol sym, e1, e2]
+          | isMathOperation sym = doMathOperation sym e1 e2
+          | "eq" == sym         = e1 `eq` e2
+          | "lambda" == sym     = lambda e1 e2
+          | "define" == sym     = define e1 e2
         evaluateList [DiySymbol "if", cond, e1, e2] = (ifElse cond e1 e2, env)
-        evaluateList [DiySymbol "+", e1, e2]        = (calc plus e1 e2, env)
-        evaluateList [DiySymbol "-", e1, e2]        = (calc diff e1 e2, env)
-        evaluateList [DiySymbol "*", e1, e2]        = (calc mult e1 e2, env)
-        evaluateList [DiySymbol "/", e1, e2]        = (calc divi e1 e2, env)
-        evaluateList [DiySymbol "mod", e1, e2]      = (calc modu e1 e2, env)
-        evaluateList [DiySymbol ">", e1, e2]        = (calc gt   e1 e2, env)
+        evaluateList (DiySymbol "lambda" : _)       = (DiyError InvalidArgument, env)
+        evaluateList (DiySymbol "define" : _)       = (DiyError InvalidArgument, env)
+        evaluateList (DiyClosure cFunc cEnv : args) = evaluateFunctionCall cFunc cEnv args
         evaluateList list@(DiySymbol _ : _)         = evaluateListStartingWithSymbol list
         evaluateList list@(DiyList _ : _)           = evaluateListStartingWithList list
-        evaluateList other                          = (DiyError NotAFunction, env)
+        evaluateList []                             = (DiyError EmptyFunctionCall, env)
+        evaluateList _                              = (DiyError NotAFunction, env)
+        --evaluateList other                          = (DiyList other, env)
 
 
         -- Function evaluation :
@@ -48,11 +47,20 @@ evaluate' ast env =
           evaluate' fBody fEnv
 
         evaluateFunctionCall func@(DiyFunction fParams fBody) fEnv args =
-          evaluate' fBody newEnv
+          if numArguments == numParameters
+          then evaluate' fBody extEnvWithArgs
+          else (DiyError functionArgError, fEnv)
 
-          where newEnv            = foldr (flip extend) fEnv bindings
-                bindings          = zip (val <$> fParams) (eval <$> args)
+          where extEnvWithArgs    = foldr (flip extend) extendedEnv argBindings
+                extendedEnv       = foldr (flip extend) env fEnvBindings
+                fEnvBindings      = bindings fEnv
+                argBindings       = zip (val <$> fParams) (eval <$> args)
+                numParameters     = length fParams
+                numArguments      = length args
                 val (DiySymbol v) = v
+                functionArgError  = InvalidFunctionArguments { expected = numParameters
+                                                             , received = numArguments
+                                                             }
 
 
         -- Special list evaluations :
@@ -80,18 +88,32 @@ evaluate' ast env =
 
         -- `eq` :
 
-        isEqual (DiyList [DiySymbol "quote", s1])
-                (DiyList [DiySymbol "quote", s2])    = isEqual s1 s2
-        isEqual (DiyList l1) (DiyList l2) | l1 == l2 = DiyBool False
-        isEqual e1@(DiyList _) e2                    = isEqual (eval e1) e2
-        isEqual e1 e2@(DiyList _)                    = isEqual e1 (eval e2)
-        isEqual (DiySymbol s1) (DiySymbol s2)        = DiyBool $ s1 == s2
-        isEqual (DiyBool s1) (DiyBool s2)            = DiyBool $ s1 == s2
-        isEqual (DiyInt s1) (DiyInt s2)              = DiyBool $ s1 == s2
-        isEqual _ _                                  = DiyBool False
+        e1 `eq` e2 = (isEqual e1 e2, env)
+
+        isEqual e1 e2
+          | isQuotedList e1 || isQuotedList e2 = DiyBool False
+          | isQuote e1 || isQuote e2           = isEqualQuote e1 e2
+          | shouldEval e1                      = isEqual (eval e1) e2
+          | shouldEval e2                      = isEqual e1 (eval e2)
+        isEqual (DiyBool s1) (DiyBool s2)      = DiyBool $ s1 == s2
+        isEqual (DiyInt s1) (DiyInt s2)        = DiyBool $ s1 == s2
+        isEqual _ _                            = DiyBool False
+
+        isEqualQuote (DiyList [DiySymbol "quote", s1])
+                     (DiyList [DiySymbol "quote", s2])
+                     = DiyBool $ s1 == s2
 
 
-        -- math operators :
+        -- math operations :
+
+        isMathOperation = flip elem ["+",  "-",  "*",  "/",  "mod", ">"]
+
+        doMathOperation "+"   e1 e2 = (calc plus e1 e2, env)
+        doMathOperation "-"   e1 e2 = (calc diff e1 e2, env)
+        doMathOperation "*"   e1 e2 = (calc mult e1 e2, env)
+        doMathOperation "/"   e1 e2 = (calc divi e1 e2, env)
+        doMathOperation "mod" e1 e2 = (calc modu e1 e2, env)
+        doMathOperation ">"   e1 e2 = (calc gt   e1 e2, env)
 
         calc op e1@(DiyInt _) e2@(DiyInt _) = e1 `op` e2
         calc op e1 e2
@@ -136,6 +158,13 @@ evaluate' ast env =
 
         -- aux :
 
+        shouldEval (DiyList [DiySymbol "quote", _]) = False
         shouldEval (DiyList _)   = True
         shouldEval (DiySymbol _) = True
         shouldEval _             = False
+
+        isQuotedList (DiyList [DiySymbol "quote", DiyList _]) = True
+        isQuotedList _                                        = False
+
+        isQuote (DiyList [DiySymbol "quote", _]) = True
+        isQuote _                                = False

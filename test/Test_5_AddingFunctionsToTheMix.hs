@@ -298,12 +298,12 @@ argumentsToFunctionsAreEvaluated = testCase
 callingWithWrongNumberOfArguments :: TestTree
 callingWithWrongNumberOfArguments = testCase
   "\n Test 5.17 - Calling with wrong number of arguments. \n\
-  \ Functions should produce a <DiyError WrongNumberOfFunctionArguments> \n\
+  \ Functions should produce a <DiyError InvalidFunctionArguments> \n\
   \ error when called with the wrong number of arguments" $ do
 
     let defineFn = parse "(define fn (lambda (p1 p2) 'whatever))"
         (_, env) = evaluate defineFn $ Environment []
-        expected = DiyError $ WrongNumberOfFunctionArguments 2 3
+        expected = DiyError $ InvalidFunctionArguments 2 3
         input    = parse "(fn 1 2 3)"
 
     assertEvaluateWithEnvironment env (expected, input)

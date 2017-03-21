@@ -27,9 +27,9 @@ data DiyErrorType = IncompleteExpression
                   | LookUpError String
                   -- Errors related to function calls
                   | NotAFunction
-                  | WrongNumberOfFunctionArguments { expected :: Int
-                                                   , received :: Int
-                                                   }
+                  | InvalidFunctionArguments { expected :: Int
+                                             , received :: Int
+                                             }
                   | EmptyFunctionCall
                  deriving (Show, Eq)
 
