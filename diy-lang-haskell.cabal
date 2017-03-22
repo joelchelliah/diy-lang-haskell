@@ -45,6 +45,7 @@ test-suite diy-lang-haskell-test
                      , Test_3_EvaluatingComplexExpressions
                      , Test_4_WorkingWithVariables
                      , Test_5_AddingFunctionsToTheMix
+                     , Test_6_WorkingWithLists
                      , TestHelper
   build-depends:       base
                      , tasty >= 0.11

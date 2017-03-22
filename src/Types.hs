@@ -31,6 +31,9 @@ data DiyErrorType = IncompleteExpression
                                              , received :: Int
                                              }
                   | EmptyFunctionCall
+                  -- Errors related to lists
+                  | AccessingEmptyList
+                  | NotAList
                  deriving (Show, Eq)
 
 
