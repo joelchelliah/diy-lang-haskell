@@ -25,11 +25,14 @@ evaluate' ast env =
         evaluateList [DiySymbol sym, e]
           | "quote" == sym = (e, env)
           | "atom" == sym  = (isAtom e, env)
+
         evaluateList [DiySymbol sym, e1, e2]
           | isMathOperation sym = doMathOperation sym e1 e2
           | "eq" == sym         = e1 `eq` e2
           | "lambda" == sym     = lambda e1 e2
           | "define" == sym     = define e1 e2
+          | "cons" == sym       = cons e1 e2
+
         evaluateList [DiySymbol "if", cond, e1, e2] = (ifElse cond e1 e2, env)
         evaluateList (DiySymbol "lambda" : _)       = (DiyError InvalidArgument, env)
         evaluateList (DiySymbol "define" : _)       = (DiyError InvalidArgument, env)
@@ -156,10 +159,24 @@ evaluate' ast env =
         lambda _ _ = (DiyError InvalidArgument, env)
 
 
+        -- `cons` :
+
+        cons exp list
+          | shouldEval exp  = cons (eval exp) list
+          | shouldEval list = cons exp (eval list)
+        cons exp (DiyList list) =
+          (DiyList $ exp : list, env)
+        cons exp list =
+          (list, env)
+
+
         -- aux :
 
-        shouldEval (DiyList [DiySymbol "quote", _]) = False
-        shouldEval (DiyList _)   = True
+        shouldEval (DiyList (DiySymbol _ : _)) = True
+        shouldEval (DiyList _)                 = False
+        -- shouldEval list@(DiyList _)
+        --   | isQuote list         = False
+        --   | otherwise            = True
         shouldEval (DiySymbol _) = True
         shouldEval _             = False
 
@@ -168,3 +185,5 @@ evaluate' ast env =
 
         isQuote (DiyList [DiySymbol "quote", _]) = True
         isQuote _                                = False
+
+        --quote exp = DiyList [DiySymbol "quote", exp]

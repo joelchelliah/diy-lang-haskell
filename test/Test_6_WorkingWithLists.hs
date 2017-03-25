@@ -19,9 +19,10 @@ creatingListsByQuoting = testCase
   \ the expression would be seen as a call to the first element \n\
   \ -- `1` in this case, which obviously isn't a function"  $ do
 
-    let exp = parse "(1 2 3 #t)"
+    let input    = parse "'(1 2 3 #t)"
+        expected = parse "(1 2 3 #t)"
 
-    assertEvaluateWithoutEnvironment (exp, exp)
+    assertEvaluateWithoutEnvironment (expected, input)
 
 
 creatingListWithCons :: TestTree
