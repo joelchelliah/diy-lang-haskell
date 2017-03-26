@@ -24,13 +24,19 @@ evaluate' ast env =
 
         evaluateList [DiySymbol sym, e]
           | "quote" == sym = (e, env)
-          | "atom" == sym  = (isAtom e, env)
+          | shouldEval e   = evaluateList [DiySymbol sym, eval e]
+          | "atom"  == sym = (isAtom e, env)
+          | "head"  == sym = head' e
+          | "tail"  == sym = tail' e
+          | "empty" == sym = isEmpty e
 
         evaluateList [DiySymbol sym, e1, e2]
-          | isMathOperation sym = doMathOperation sym e1 e2
-          | "eq" == sym         = e1 `eq` e2
-          | "lambda" == sym     = lambda e1 e2
+          | "eq"     == sym     = e1 `eq` e2
           | "define" == sym     = define e1 e2
+          | "lambda" == sym     = lambda e1 e2
+          | shouldEval e1       = evaluateList [DiySymbol sym, eval e1, e2]
+          | shouldEval e2       = evaluateList [DiySymbol sym, e1, eval e2]
+          | isMathOperation sym = doMathOperation sym e1 e2
           | "cons" == sym       = cons e1 e2
 
         evaluateList [DiySymbol "if", cond, e1, e2] = (ifElse cond e1 e2, env)
@@ -41,13 +47,12 @@ evaluate' ast env =
         evaluateList list@(DiyList _ : _)           = evaluateListStartingWithList list
         evaluateList []                             = (DiyError EmptyFunctionCall, env)
         evaluateList _                              = (DiyError NotAFunction, env)
-        --evaluateList other                          = (DiyList other, env)
 
 
         -- Function evaluation :
 
-        evaluateFunction (DiyFunction fArgs fBody) fEnv =
-          evaluate' fBody fEnv
+        evaluateFunction (DiyFunction fArgs fBody) =
+          evaluate' fBody
 
         evaluateFunctionCall func@(DiyFunction fParams fBody) fEnv args =
           if numArguments == numParameters
@@ -85,7 +90,6 @@ evaluate' ast env =
 
         isAtom (DiyList (DiySymbol "quote":_)) = DiyBool True
         isAtom (DiyList _)                     = DiyBool False
-        isAtom (DiyError _)                    = DiyBool False
         isAtom _                               = DiyBool True
 
 
@@ -119,9 +123,6 @@ evaluate' ast env =
         doMathOperation ">"   e1 e2 = (calc gt   e1 e2, env)
 
         calc op e1@(DiyInt _) e2@(DiyInt _) = e1 `op` e2
-        calc op e1 e2
-          | shouldEval e1 = calc op (eval e1) e2
-          | shouldEval e2 = calc op e1 (eval e2)
         calc _ _ _                          = DiyError InvalidArgument
 
         plus (DiyInt x) (DiyInt y) = DiyInt  $ x + y
@@ -161,29 +162,40 @@ evaluate' ast env =
 
         -- `cons` :
 
-        cons exp list
-          | shouldEval exp  = cons (eval exp) list
-          | shouldEval list = cons exp (eval list)
-        cons exp (DiyList list) =
-          (DiyList $ exp : list, env)
-        cons exp list =
-          (list, env)
+        cons exp (DiyList list) = (DiyList $ exp : list, env)
+        cons exp list           = (DiyError NotAList, env)
+
+
+        -- `head` :
+
+        head' (DiyList (h:t)) = (h, env)
+        head' (DiyList [])    = (DiyError AccessingEmptyList, env)
+        head' _               = (DiyError NotAList, env)
+
+
+        -- `tail` :
+
+        tail' (DiyList (h:t)) = (DiyList t, env)
+        tail' (DiyList [])    = (DiyError AccessingEmptyList, env)
+        tail' _               = (DiyError NotAList, env)
+
+
+        -- `empty` :
+
+        isEmpty (DiyList []) = (DiyBool True, env)
+        isEmpty (DiyList _ ) = (DiyBool False, env)
+        isEmpty _            = (DiyError NotAList, env)
 
 
         -- aux :
 
         shouldEval (DiyList (DiySymbol _ : _)) = True
         shouldEval (DiyList _)                 = False
-        -- shouldEval list@(DiyList _)
-        --   | isQuote list         = False
-        --   | otherwise            = True
-        shouldEval (DiySymbol _) = True
-        shouldEval _             = False
+        shouldEval (DiySymbol _)               = True
+        shouldEval _                           = False
 
         isQuotedList (DiyList [DiySymbol "quote", DiyList _]) = True
         isQuotedList _                                        = False
 
         isQuote (DiyList [DiySymbol "quote", _]) = True
         isQuote _                                = False
-
-        --quote exp = DiyList [DiySymbol "quote", exp]

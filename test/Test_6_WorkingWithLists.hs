@@ -124,14 +124,7 @@ callingTailOnSomethingElse = testCase
 checkingIfListIsEmpty :: TestTree
 checkingIfListIsEmpty = testCase
   "\n Test 6.10 - Checking if a list is empty. \n\
-  \ The `empty` form checks whether or not a list is empty" $ do
-
-    let nullListEnv = Environment [("somelist", DiyList [])]
-        someListEnv = Environment [("somelist", DiyList [ DiyInt 1
-                                                        , DiyInt 2
-                                                        , DiyInt 3
-                                                        ]
-                                  )]
+  \ The `empty` form checks whether or not a list is empty" $
 
     mapM_ assertEvaluateWithoutEnvironment
       [ (DiyBool False, parse "(empty '(1 2 3))"   )
@@ -140,8 +133,27 @@ checkingIfListIsEmpty = testCase
       , (DiyBool True , parse "(empty (tail '(1)))")
       ]
 
-    assertEvaluateWithEnvironment someListEnv (DiyBool False, parse "(empty somelist)")
+
+headTailAndEmptyEvaluateTheirArguments :: TestTree
+headTailAndEmptyEvaluateTheirArguments = testCase
+  "\n Test 6.11 - Function arguments are evaluated first. \n\
+  \ Calls to `head`, `tail`, `empty` (or any other special forms) \n\
+  \ should always evaluate their arguments first" $ do
+
+    let nullListEnv = Environment [("somelist", DiyList [])]
+        someListEnv = Environment [("somelist", DiyList [ DiyInt 1
+                                                        , DiyInt 2
+                                                        , DiyInt 3
+                                                        ]
+                                  )]
+
     assertEvaluateWithEnvironment nullListEnv (DiyBool True , parse "(empty somelist)")
+
+    mapM_ (assertEvaluateWithEnvironment someListEnv)
+          [ (DiyInt 1                    , parse "(head somelist)" )
+          , (DiyList [DiyInt 2, DiyInt 3], parse "(tail somelist)" )
+          , (DiyBool False               , parse "(empty somelist)")
+          ]
 
 
 workingWithListsTests :: TestTree
@@ -157,4 +169,5 @@ workingWithListsTests =
     , gettingTheTailOfEmptyList
     , callingTailOnSomethingElse
     , checkingIfListIsEmpty
+    , headTailAndEmptyEvaluateTheirArguments
     ]
