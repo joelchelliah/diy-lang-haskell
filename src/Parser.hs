@@ -5,6 +5,7 @@ import           ParserSolution
 import           ParserUtil
 import           Types
 
+
 -- This is the Parser module, with the `parse` function which you'll
 -- implement as <part 1> of the workshop. Its job is to convert strings
 -- into data structures that the evaluator can understand.
@@ -55,5 +56,4 @@ unparse (DiyBool False)                       = "#f"
 unparse (DiyInt int)                          = show int
 unparse (DiyList (DiySymbol "quote":exps)) = "'" ++ unwords (unparse <$> exps)
 unparse (DiyList exps)                        = "(" ++ unwords (unparse <$> exps) ++ ")"
-unparse (DiyError IncompleteExpression)        = "Error: Incomplete expression!"
-unparse (DiyError ExpressionTooLarge)          = "Error: Expression too large!"
+unparse (DiyError err)                        = "Error: " ++ show err

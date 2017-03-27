@@ -8,6 +8,7 @@ import           Environment                     (extend, lookup)
 import           Evaluator                       (evaluate)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
+import           Interpreter                     (interpret)
 import           Types
 
 --
@@ -67,3 +68,17 @@ assertClosureFunction :: DiyAST -> DiyFunctionParams -> DiyFunctionBody -> Asser
 assertClosureFunction (DiyClosure func _) expectedParams expectedBody = do
   assertEqual "closure function params" expectedParams $ params func
   assertEqual "closure function body" expectedBody $ body func
+
+
+-- Assertions for validating the result of interpreting an input string.
+-- Both with and without an already existing environment.
+
+assertInterpretWithoutEnvironment :: (String, String) -> Assertion
+assertInterpretWithoutEnvironment (expected, input) =
+  assertEqual description expected $ interpret input environment
+
+  where description = descInterpret input
+        environment = Environment []
+
+descInterpret :: String -> String
+descInterpret input = "interpret \"" ++ input ++ "\""

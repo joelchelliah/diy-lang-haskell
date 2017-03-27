@@ -7,6 +7,7 @@ import           Test_3_EvaluatingComplexExpressions
 import           Test_4_WorkingWithVariables
 import           Test_5_AddingFunctionsToTheMix
 import           Test_6_WorkingWithLists
+import           Test_7_UsingTheLanguage
 
 main :: IO ()
 -- main = defaultMainWithIngredients (map failFast defaultIngredients) tests
@@ -20,4 +21,5 @@ tests = testGroup "DIY Lang Tests"
   , workingWithVariabesTests
   , addingFunctionsToTheMixTests
   , workingWithListsTests
+  , usingTheLanguageTests
   ]
