@@ -1,11 +1,11 @@
 module Interpreter where
 
 import           Data.Char      (isDigit)
+import           Evaluator      (evaluate)
+import           Parser         (parse, parseMultiple, unparse)
 import           ParserSolution
 import           ParserUtil
 import           Types
-import           Evaluator (evaluate)
-import           Parser (parse, unparse, parseMultiple)
 
 
 -- This is the Interpreter module, which can be used to interpret
@@ -29,11 +29,20 @@ interpret source env =
 -- Given the name of a DiyLang file,
 -- interprets the series of statements within,
 -- and returns the result of the last expression as a string.
-interpretFile :: String -> IO ()
+interpretFile :: String -> IO Environment
 interpretFile fileName = do
-  contents <- readFile fileName
+  content <- readFile fileName
 
-  -- TODO: need to carry over the environment from each evaluated AST!
-  let (result, _) = evaluate (parseMultiple contents) $ Environment []
-  
-  putStrLn $ "TODO! (file has " ++ show (length (lines contents)) ++ " lines)."
+  let buildEnv ast env = snd (evaluate ast env)
+      asts     = parseMultiple content
+
+  return $ foldr buildEnv (Environment []) asts
+
+  --putStrLn $ "TODO! (file has " ++ show (length (lines content)) ++ " lines)."
+
+
+testParsing :: String -> IO [DiyAST]
+testParsing fileName = do
+  content <- readFile fileName
+
+  return $ parseMultiple content

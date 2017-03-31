@@ -16,11 +16,11 @@ import           Types
 -- your language could contain. Each test will check the implementation
 -- of one stdlib function.
 --
--- Place your functions in the `diylang/stdlib.diy` file. The first
+-- Place your functions in the `stdlib.diy` file in the root folder. The first
 -- function, `not` is already defined for you. It's your job to create
 -- the rest... or perhaps somthing completely different?
 --
--- Anything you put in `diylang/stdlib.diy` is also available from the REPL,
+-- Anything you put in `stdlib.diy` is also available from the REPL,
 -- so feel free to test your functions out there as well:
 --
 --      $ ./repl

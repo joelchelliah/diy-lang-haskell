@@ -41,11 +41,14 @@ parse source =
 
 -- Parses a string representation of *multiple* expressions
 -- and generates the corresponding Abstract Syntax Tree.
-parseMultiple :: String -> DiyAST
+parseMultiple :: String -> [DiyAST]
 parseMultiple source =
-  case splitExpressions $ removeComments source of
-    Left parsingError -> DiyError IncompleteExpression
-    Right expressions -> DiyList $ parse <$> expressions
+  case splitExpressions $ clean source of
+    Right expressions -> parse <$> expressions
+    Left parsingError -> []
+
+  where clean = trim . removeComments
+        trim  = unwords . concatMap words . filter ((0 <) . length) . lines
 
 
 -- Turns a Diy AST back into a string representation.
