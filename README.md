@@ -12,9 +12,9 @@ By the end of this tutorial you will be the proud author of a programming langua
 ## Current status
 This project is still a **Work in progress** :
 
-:white_check_mark: Parts 1-4 - **Done**  
-:construction: Part 5 - **Wip**  
-:soon: Parts 6-8 - **Todo**
+:white_check_mark: Parts 1-6 - **Done**  
+:construction: Part 7 - **Wip**  
+:soon: Parts 8 - **Todo**
 
 ---
 
