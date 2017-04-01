@@ -6,6 +6,7 @@ import           Test.Tasty.Ingredients.FailFast
 
 import           Environment                     (extend, lookup)
 import           Evaluator                       (evaluate)
+import           Interpreter                     (interpretFile)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
 import           TestHelper
@@ -36,158 +37,80 @@ testingNot :: TestTree
 testingNot = testCase
   "\n Test 7.1 - The `not` function" $ do
 
-    -- TODO: Load stdlib into the environment
-    let env = Environment []
+    env <- stdLibEnv
 
-    mapM_ assertInterpretWithoutEnvironment
+    mapM_ (assertInterpretWithEnvironment env)
       [ ("#t", "(not #f)")
       , ("#f", "(not #t)")
       ]
 
 
-creatingListWithCons :: TestTree
-creatingListWithCons = testCase
-  "\n Test 6.2 - Creating a list with `cons`. \n\
-  \ The `cons` function should prepend an element to the front \n\
-  \ of a list" $ do
+testingOr :: TestTree
+testingOr = testCase
+  "\n Test 7.2 - The `or` function" $ do
 
-    let input    = parse "(cons 0 '(1 2 3))"
-        expected = parse "(0 1 2 3)"
+    env <- stdLibEnv
 
-    assertEvaluateWithoutEnvironment (expected, input)
-
-
-creatingLongerListsWithCons :: TestTree
-creatingLongerListsWithCons = testCase
-  "\n Test 6.3 - `cons` should evaluate it's arguments. \n\
-  \ Like all the other special forms and functions in our language, \n\
-  \ `cons` is call-by-value. This means that the arguments must be \n\
-  \ evaluated before we create the list with their values" $ do
-
-    let input    = parse "(cons 3 (cons (- 4 2) (cons 1 '())))"
-        expected = parse "(3 2 1)"
-
-    assertEvaluateWithoutEnvironment (expected, input)
-
-
-gettingFirstElementFromList :: TestTree
-gettingFirstElementFromList = testCase
-  "\n Test 6.4 - Getting the first element from a list. \n\
-  \ `head` should extract the first element of a list" $
-
-    mapM_ assertEvaluateWithoutEnvironment
-      [ (DiyInt 1, parse "(head '(1))")
-      , (DiyInt 2, parse "(head '(2 3 4 5))")
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("#f", "(or #f #f)")
+      , ("#t", "(or #t #f)")
+      , ("#t", "(or #f #t)")
+      , ("#t", "(or #t #t)")
       ]
 
 
-gettingFirstElementFromEmptyList :: TestTree
-gettingFirstElementFromEmptyList = testCase
-  "\n Test 6.5 - Getting the first element from an empty list. \n\
-  \ If the list is empty, there is no first element, so `head` \n\
-  \  should produce a <DiyError AccessingEmptyList>" $ do
+testingAnd :: TestTree
+testingAnd = testCase
+  "\n Test 7.3 - The `and` function" $ do
 
-    let input    = parse "(head (quote ()))"
-        expected = DiyError AccessingEmptyList
+    env <- stdLibEnv
 
-    assertEvaluateWithoutEnvironment (expected, input)
-
-
-callingHeadOnSomethingElse :: TestTree
-callingHeadOnSomethingElse = testCase
-  "\n Test 6.6 - Calling `head` on something else. \n\
-  \ It only makes sense to call `head` on a list. Anything else \n\
-  \ should produce a <DiyError NotAList>" $ do
-
-    let input    = parse "(head #t)"
-        expected = DiyError NotAList
-
-    assertEvaluateWithoutEnvironment (expected, input)
-
-
-gettingTheTailOfList :: TestTree
-gettingTheTailOfList = testCase
-  "\n Test 6.7 - Getting the tail of a list. \n\
-  \ `tail` should return the remainder of the list after \n\
-  \ removing the first element" $
-
-    mapM_ assertEvaluateWithoutEnvironment
-      [ (DiyList [DiyInt 2, DiyInt 3], parse "(tail '(1 2 3))")
-      , (DiyList [], parse "(tail '(1))")
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("#f", "(and #f #f)")
+      , ("#f", "(and #t #f)")
+      , ("#f", "(and #f #t)")
+      , ("#t", "(and #t #t)")
       ]
 
 
-gettingTheTailOfEmptyList :: TestTree
-gettingTheTailOfEmptyList = testCase
-  "\n Test 6.8 - Getting the tail of an empty list. \n\
-  \ If the list is empty, there is no tail, so `tail` should \n\
-  \ produce a <DiyError AccessingEmptyList>" $ do
+testingXor :: TestTree
+testingXor = testCase
+  "\n Test 7.4 - The `xor` function" $ do
 
-    let input    = parse "(tail (quote ()))"
-        expected = DiyError AccessingEmptyList
+    env <- stdLibEnv
 
-    assertEvaluateWithoutEnvironment (expected, input)
-
-
-callingTailOnSomethingElse :: TestTree
-callingTailOnSomethingElse = testCase
-  "\n Test 6.9 - Calling `tail` on something else. \n\
-  \ It only makes sense to call `tail` on a list. Anything else \n\
-  \ should produce a <DiyError NotAList>" $ do
-
-    let input    = parse "(tail 1)"
-        expected = DiyError NotAList
-
-    assertEvaluateWithoutEnvironment (expected, input)
-
-
-checkingIfListIsEmpty :: TestTree
-checkingIfListIsEmpty = testCase
-  "\n Test 6.10 - Checking if a list is empty. \n\
-  \ The `empty` form checks whether or not a list is empty" $
-
-    mapM_ assertEvaluateWithoutEnvironment
-      [ (DiyBool False, parse "(empty '(1 2 3))"   )
-      , (DiyBool False, parse "(empty '(1))"       )
-      , (DiyBool True , parse "(empty '())"        )
-      , (DiyBool True , parse "(empty (tail '(1)))")
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("#f", "(xor #f #f)")
+      , ("#t", "(xor #t #f)")
+      , ("#t", "(xor #f #t)")
+      , ("#f", "(xor #t #t)")
       ]
 
 
-headTailAndEmptyEvaluateTheirArguments :: TestTree
-headTailAndEmptyEvaluateTheirArguments = testCase
-  "\n Test 6.11 - Function arguments are evaluated first. \n\
-  \ Calls to `head`, `tail`, `empty` (or any other special forms) \n\
-  \ should always evaluate their arguments first" $ do
+-- The language core just contains the > operator.
+-- It's time to implement the rest!
 
-    let nullListEnv = Environment [("somelist", DiyList [])]
-        someListEnv = Environment [("somelist", DiyList [ DiyInt 1
-                                                        , DiyInt 2
-                                                        , DiyInt 3
-                                                        ]
-                                  )]
 
-    assertEvaluateWithEnvironment nullListEnv (DiyBool True , parse "(empty somelist)")
+testingGreaterOrEqual :: TestTree
+testingGreaterOrEqual = testCase
+  "\n Test 7.5 - The `>=` function" $ do
 
-    mapM_ (assertEvaluateWithEnvironment someListEnv)
-          [ (DiyInt 1                    , parse "(head somelist)" )
-          , (DiyList [DiyInt 2, DiyInt 3], parse "(tail somelist)" )
-          , (DiyBool False               , parse "(empty somelist)")
-          ]
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("#f", "(>= 1 2)")
+      , ("#t", "(>= 1 2)")
+      , ("#t", "(>= 2 1)")
+      ]
+
 
 
 usingTheLanguageTests :: TestTree
 usingTheLanguageTests =
   testGroup "- Using the language -"
     [ testingNot
-    , creatingListWithCons
-    , creatingLongerListsWithCons
-    , gettingFirstElementFromList
-    , gettingFirstElementFromEmptyList
-    , callingHeadOnSomethingElse
-    , gettingTheTailOfList
-    , gettingTheTailOfEmptyList
-    , callingTailOnSomethingElse
-    , checkingIfListIsEmpty
-    , headTailAndEmptyEvaluateTheirArguments
+    , testingOr
+    , testingAnd
+    , testingXor
+    , testingGreaterOrEqual
     ]

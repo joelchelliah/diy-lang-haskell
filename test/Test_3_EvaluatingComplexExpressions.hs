@@ -5,7 +5,7 @@ import           Test.Tasty.HUnit
 import           Test.Tasty.Ingredients.FailFast
 
 import           Environment
-import           Evaluator
+import           Evaluator                       (evaluate)
 import           Parser                          (parse)
 import           TestHelper
 import           Types

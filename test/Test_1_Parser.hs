@@ -4,7 +4,8 @@ import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.Ingredients.FailFast
 
-import           Parser
+import           InterpreterUtil                 (unparse)
+import           Parser                          (parse)
 import           TestHelper
 import           Types
 

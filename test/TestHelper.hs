@@ -6,9 +6,9 @@ import           Test.Tasty.Ingredients.FailFast
 
 import           Environment                     (extend, lookup)
 import           Evaluator                       (evaluate)
+import           Interpreter                     (interpret, interpretFile)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
-import           Interpreter                     (interpret)
 import           Types
 
 --
@@ -29,20 +29,16 @@ descParse input = "parse \"" ++ input ++ "\""
 -- Assertions for validating the result of evaluating an AST.
 -- Both with and without an already existing environment.
 
-assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion
-assertEvaluateWithoutEnvironment (expected, input) =
-  assertEqual description expected result
-
-  where description = descEvaluate input environment
-        (result, _) = evaluate input environment
-        environment = Environment []
-
 assertEvaluateWithEnvironment :: Environment -> (DiyAST, DiyAST) -> Assertion
 assertEvaluateWithEnvironment env (expected, input) =
   assertEqual description expected result
 
   where description = descEvaluate input env
         (result, _) = evaluate input env
+
+assertEvaluateWithoutEnvironment :: (DiyAST, DiyAST) -> Assertion
+assertEvaluateWithoutEnvironment =
+  assertEvaluateWithEnvironment $ Environment []
 
 descEvaluate :: DiyAST -> Environment -> String
 descEvaluate input env =
@@ -73,12 +69,21 @@ assertClosureFunction (DiyClosure func _) expectedParams expectedBody = do
 -- Assertions for validating the result of interpreting an input string.
 -- Both with and without an already existing environment.
 
+assertInterpretWithEnvironment :: Environment -> (String, String) -> Assertion
+assertInterpretWithEnvironment environment (expected, input) =
+  assertEqual description expected result
+
+  where description = "interpret " ++ show input
+        result      = interpret input environment
+
 assertInterpretWithoutEnvironment :: (String, String) -> Assertion
-assertInterpretWithoutEnvironment (expected, input) =
-  assertEqual description expected $ interpret input environment
+assertInterpretWithoutEnvironment =
+  assertInterpretWithEnvironment $ Environment []
 
-  where description = descInterpret input
-        environment = Environment []
 
-descInterpret :: String -> String
-descInterpret input = "interpret \"" ++ input ++ "\""
+-- Generate an environment containing all the functions
+-- in the standard library.
+
+stdLibEnv :: IO Environment
+stdLibEnv =
+  snd <$> interpretFile "stdlib.diy"
