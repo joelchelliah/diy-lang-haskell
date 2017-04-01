@@ -1,4 +1,4 @@
-module Parser ( parse, unparse, parseMultiple ) where
+module Parser ( parse ) where
 
 import           Data.Char      (isDigit)
 import           ParserSolution
@@ -32,31 +32,3 @@ parse source =
 
 ----------------------------------------------------------------
 ----------------------------------------------------------------
-
-
--- The functions below: `parseMultiple` and `unparse` are
--- implemented in order for the REPL to work.
--- Don't worry about them when implementing the language.
-
-
--- Parses a string representation of *multiple* expressions
--- and generates the corresponding Abstract Syntax Tree.
-parseMultiple :: String -> [DiyAST]
-parseMultiple source =
-  case splitExpressions $ clean source of
-    Right expressions -> parse <$> expressions
-    Left parsingError -> []
-
-  where clean = trim . removeComments
-        trim  = unwords . concatMap words . filter ((0 <) . length) . lines
-
-
--- Turns a Diy AST back into a string representation.
-unparse :: DiyAST -> String
-unparse (DiySymbol string)                    = string
-unparse (DiyBool True)                        = "#t"
-unparse (DiyBool False)                       = "#f"
-unparse (DiyInt int)                          = show int
-unparse (DiyList (DiySymbol "quote":exps)) = "'" ++ unwords (unparse <$> exps)
-unparse (DiyList exps)                        = "(" ++ unwords (unparse <$> exps) ++ ")"
-unparse (DiyError err)                        = "Error: " ++ show err

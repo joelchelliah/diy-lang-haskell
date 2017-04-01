@@ -23,6 +23,7 @@ library
                      , Environment
                      , Interpreter
                      , ParserUtil
+                     , InterpreterUtil
                      , ParserSolution
                      , EvaluatorSolution
                      , EnvironmentSolution

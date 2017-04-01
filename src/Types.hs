@@ -4,7 +4,9 @@ module Types where
 -- This module holds the types which will represent our
 -- abstract syntax tree, as well as the Environment type
 -- which will keep track of stored values during evaluation.
-
+--
+-- You are not required to make any changes in this file as part of
+-- the workshop.
 
 -- The types representing the different parts of our AST.
 data DiyAST = DiySymbol String

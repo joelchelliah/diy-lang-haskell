@@ -3,6 +3,9 @@ module ParserUtil where
 -- A few useful utility functions that should come in handy when
 -- implementing the `parse` function in Parser.hs. We don't want to
 -- spend the day implementing parenthesis counting, after all.
+--
+-- You are not required to make any changes in this file as part of
+-- the workshop.
 
 
 -- Errors that can be produced by a utility function.

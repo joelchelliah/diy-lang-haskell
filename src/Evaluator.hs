@@ -2,7 +2,6 @@ module Evaluator where
 
 import           Environment
 import           EvaluatorSolution
-import           Parser            (unparse)
 import           Prelude           hiding (lookup)
 import           Types
 
