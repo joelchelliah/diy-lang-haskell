@@ -19,11 +19,11 @@ import           Types
 -- Given a program statement as string, and an environment,
 -- it interprets the statement, and returns the result of the
 -- expression as a string, along with the environment.
-interpret :: String -> Environment -> String
+interpret :: String -> Environment -> (String, Environment)
 interpret source env =
-  unparse result
+  (unparse ast', env')
 
-  where (result, _) = evaluate (parse source) env
+  where (ast', env') = evaluate (parse source) env
 
 
 -- Interprets a DiyLang program from file.

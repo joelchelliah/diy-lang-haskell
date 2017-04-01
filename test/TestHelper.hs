@@ -74,7 +74,7 @@ assertInterpretWithEnvironment environment (expected, input) =
   assertEqual description expected result
 
   where description = "interpret " ++ show input
-        result      = interpret input environment
+        (result, _) = interpret input environment
 
 assertInterpretWithoutEnvironment :: (String, String) -> Assertion
 assertInterpretWithoutEnvironment =

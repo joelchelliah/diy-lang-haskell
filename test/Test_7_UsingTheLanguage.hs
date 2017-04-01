@@ -6,7 +6,7 @@ import           Test.Tasty.Ingredients.FailFast
 
 import           Environment                     (extend, lookup)
 import           Evaluator                       (evaluate)
-import           Interpreter                     (interpretFile)
+import           Interpreter                     (interpret, interpretFile)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
 import           TestHelper
@@ -99,9 +99,200 @@ testingGreaterOrEqual = testCase
 
     mapM_ (assertInterpretWithEnvironment env)
       [ ("#f", "(>= 1 2)")
-      , ("#t", "(>= 1 2)")
+      , ("#t", "(>= 2 2)")
       , ("#t", "(>= 2 1)")
       ]
+
+
+testingLessOrEqual :: TestTree
+testingLessOrEqual = testCase
+  "\n Test 7.6 - The `<=` function" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("#t", "(<= 1 2)")
+      , ("#t", "(<= 2 2)")
+      , ("#f", "(<= 2 1)")
+      ]
+
+
+testingLessThan :: TestTree
+testingLessThan = testCase
+  "\n Test 7.7 - The `<` function" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("#t", "(< 1 2)")
+      , ("#f", "(< 2 2)")
+      , ("#f", "(< 2 1)")
+      ]
+
+
+-- Lets also implement some basic list functions.
+-- These should be pretty easy with some basic recursion.
+
+
+testingLength :: TestTree
+testingLength = testCase
+  "\n Test 7.8 - The `length` function. \n\
+  \ Count the number of elements in the list" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("5", "(length '(1 2 3 4 5))"           )
+      , ("3", "(length '(#t '(1 2 3) 'foo-bar))")
+      , ("0", "(length '())"                    )
+      ]
+
+
+testingSum :: TestTree
+testingSum = testCase
+  "\n Test 7.9 - The `sum` function. \n\
+  \ Calculate the sum of all the elements in the list" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("5" , "(sum '(1 1 1 1 1))")
+      , ("10", "(sum '(1 2 3 4))"  )
+      , ("0" , "(sum '())"         )
+      ]
+
+
+testingRange :: TestTree
+testingRange = testCase
+  "\n Test 7.10 - The `range` function. \n\
+  \ Given two arguments defining the (inclusive) bounds of \n\
+  \ a range, create a list with all the numbers within that range" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("(1 2 3 4 5)", "(range 1 5)")
+      , ("(1)"        , "(range 1 1)")
+      , ("()"         , "(range 2 1)")
+      ]
+
+
+testingAppend :: TestTree
+testingAppend = testCase
+  "\n Test 7.11 - The `append` function. \n\
+  \ The `append` function should merge two lists together \n\
+  \ by placing the second list right behind the first one" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("()"            , "(append '() '())"           )
+      , ("(1)"           , "(append '() '(1))"          )
+      , ("(2)"           , "(append '(2) '())"          )
+      , ("(1 2 3 4 5)"   , "(append '(1 2) '(3 4 5))"   )
+      , ("(#t #f 'maybe)", "(append '(#t) '(#f 'maybe))")
+      ]
+
+
+testingReverse :: TestTree
+testingReverse = testCase
+  "\n Test 7.12 - The `reverse` function. \n\
+  \ The `reverse` function should reverse the order of the list. \n\
+  \ Tip: See if you can make use of the last function you just added" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("()"       , "(reverse '())"       )
+      , ("(1)"      , "(reverse '(1))"      )
+      , ("(4 3 2 1)", "(reverse '(1 2 3 4))")
+      ]
+
+
+-- Our standard library should contain these three fundamental functions:
+-- `filter`, `map` and `fold`.
+
+
+testingFilter :: TestTree
+testingFilter = testCase
+  "\n Test 7.13 - The `filter` function. \n\
+  \ The `filter` function should remove all elements that do \n\
+  \ not satisfy the given predicate, from the list" $ do
+
+    env <- stdLibEnv
+
+    let evenFn    = "\n\
+        \(define even\n\
+        \    (lambda (x)\n\
+        \        (eq (mod x 2) 0)))"
+        (_, env') = interpret incFn env
+        input     = "(filter even '(1 2 3 4 5 6))"
+        expected  = "(2 4 6)"
+
+    assertInterpretWithEnvironment env' (expected, input)
+
+
+testingMap :: TestTree
+testingMap = testCase
+  "\n Test 7.14 - The `map` function. \n\
+  \ The `map` function should apply the given function \n\
+  \ to all the elements of the list" $ do
+
+    env <- stdLibEnv
+
+    let incFn     = "\n\
+        \(define inc\n\
+        \    (lambda (x) (+ 1 x)))"
+        (_, env') = interpret incFn env
+        input     = "(map inc '(1 2 3))"
+        expected  = "(2 3 4)"
+
+    assertInterpretWithEnvironment env' (expected, input)
+
+
+testingFold :: TestTree
+testingFold = testCase
+  "\n Test 7.15 - The `fold` function. \n\
+  \ Given a function, a default value and a list as arguments, \n\
+  \ `fold` should produce its result, by recursively combining each \n\
+  \ element of the list with the already accumulated result, using the \n\
+  \ given function. \n\
+  \ Tip: have a look at: \n\
+  \ http://en.wikipedia.org/wiki/Fold_(higher-order_function)" $ do
+
+    env <- stdLibEnv
+
+    let maxFn     = "\n\
+        \(define max\n\
+        \    (lambda (a b)\n\
+        \        (if (> a b) a b)))"
+        (_, env') = interpret maxFn env
+        input     = "(fold max 0 '(1 6 3 2))"
+        expected  = "6"
+
+    -- Evaluates as (max 1 (max 6 (max 3 (max 2 0)))) -> 6
+    assertInterpretWithEnvironment env' (expected, input)
+
+
+testingSumThroughFold :: TestTree
+testingSumThroughFold = testCase
+  "\n Test 7.16 - Summing with the `fold` function. \n\
+  \ We should be able to find the sum of a list by `fold`-ing over it" $ do
+
+    env <- stdLibEnv
+
+    let addFn     = "\n\
+        \(define add\n\
+        \    (lambda (a b) (+ a b)))"
+        (_, env') = interpret addFn env
+        input     = "(fold add 0 (range 1 4))"
+        expected  = "10"
+
+    -- Can we use this to simplify our `sum` function?
+    -- Are there any other functions that can also be rewritten with `fold` ?
+    assertInterpretWithEnvironment env' (expected, input)
+
+
 
 
 
@@ -113,4 +304,15 @@ usingTheLanguageTests =
     , testingAnd
     , testingXor
     , testingGreaterOrEqual
+    , testingLessOrEqual
+    , testingLessThan
+    , testingLength
+    , testingSum
+    , testingRange
+    , testingAppend
+    , testingReverse
+    , testingFilter
+    , testingMap
+    , testingFold
+    , testingSumThroughFold
     ]
