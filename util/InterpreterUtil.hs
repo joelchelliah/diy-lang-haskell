@@ -33,3 +33,4 @@ unparse (DiyInt int)                          = show int
 unparse (DiyList (DiySymbol "quote":exps)) = "'" ++ unwords (unparse <$> exps)
 unparse (DiyList exps)                        = "(" ++ unwords (unparse <$> exps) ++ ")"
 unparse (DiyError err)                        = "Error: " ++ show err
+unparse other                                 = "Error: Tried to unparse <<" ++ show other ++ ">>"
