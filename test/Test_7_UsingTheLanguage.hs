@@ -225,7 +225,7 @@ testingFilter = testCase
         \(define even\n\
         \    (lambda (x)\n\
         \        (eq (mod x 2) 0)))"
-        (_, env') = interpret incFn env
+        (_, env') = interpret evenFn env
         input     = "(filter even '(1 2 3 4 5 6))"
         expected  = "(2 4 6)"
 
@@ -289,11 +289,32 @@ testingSumThroughFold = testCase
         expected  = "10"
 
     -- Can we use this to simplify our `sum` function?
-    -- Are there any other functions that can also be rewritten with `fold` ?
+    -- Are there any other functions that can also be written using `fold` ?
     assertInterpretWithEnvironment env' (expected, input)
 
 
+-- Finally, no stdlib is complete without a sorting algorithm.
+-- Quicksort or mergesort might be good options, but you choose which
+-- ever one you prefer.
+-- You might want to implement a few helper functions for this one.
 
+
+testingSort :: TestTree
+testingSort = testCase
+  "\n Test 7.17 - The `sort` function. \n\
+  \ It should sort the given list of numbers so that they are \n\
+  \ in ascending order" $ do
+
+    env <- stdLibEnv
+
+    mapM_ (assertInterpretWithEnvironment env)
+      [ ("()"             , "(sort '())"             )
+      , ("(1)"            , "(sort '(1))"            )
+      , ("(1 2 3 4 5 6 7)", "(sort '(6 3 7 2 4 1 5))")
+      , ("(1 2 3 4 5 6 7)", "(sort '(1 2 3 4 5 6 7))")
+      , ("(1 2 3 4 5 6 7)", "(sort '(7 6 5 4 3 2 1))")
+      , ("(1 1 1)"        , "(sort '(1 1 1))"        )
+      ]
 
 
 usingTheLanguageTests :: TestTree
@@ -315,4 +336,5 @@ usingTheLanguageTests =
     , testingMap
     , testingFold
     , testingSumThroughFold
+    , testingSort
     ]
