@@ -9,16 +9,6 @@ By the end of this tutorial you will be the proud author of a programming langua
 
 
 ---
-## Current status
-This project is still a **Work in progress** :
-
-:white_check_mark: Parts 1-6 - **Done**  
-:construction: Part 7 - **Wip**  
-:soon: Parts 8 - **Todo**
-
----
-
-
 ## What we will be making
 
 We will make a relatively simple, but neat language. We aim for the following features:
