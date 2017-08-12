@@ -28,7 +28,7 @@ data DiyErrorType = IncompleteExpression
                   -- Errors related the environment
                   | LookUpError String
                   -- Errors related to function calls
-                  | NotAFunction
+                  | NotAFunction String
                   | InvalidFunctionArguments { expected :: Int
                                              , received :: Int
                                              }

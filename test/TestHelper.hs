@@ -79,11 +79,3 @@ assertInterpretWithEnvironment environment (expected, input) =
 assertInterpretWithoutEnvironment :: (String, String) -> Assertion
 assertInterpretWithoutEnvironment =
   assertInterpretWithEnvironment $ Environment []
-
-
--- Generate an environment containing all the functions
--- in the standard library.
-
-stdLibEnv :: IO Environment
-stdLibEnv =
-  snd <$> interpretFile "stdlib.diy"

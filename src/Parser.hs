@@ -1,7 +1,6 @@
 module Parser ( parse ) where
 
-import           Data.Char      (isDigit)
-import           ParserSolution
+import           Data.Char  (isDigit)
 import           ParserUtil
 import           Types
 
@@ -26,8 +25,7 @@ import           Types
 -- generates the corresponding Abstract Syntax Tree (AST).
 parse :: String -> DiyAST
 parse source =
-  --DiySymbol "Implement this function!"
-  parse' source
+  DiySymbol "Implement this function!"
 
 
 ----------------------------------------------------------------

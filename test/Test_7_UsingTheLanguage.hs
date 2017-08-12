@@ -6,7 +6,8 @@ import           Test.Tasty.Ingredients.FailFast
 
 import           Environment                     (extend, lookup)
 import           Evaluator                       (evaluate)
-import           Interpreter                     (interpret, interpretFile)
+import           Interpreter                     (interpret, interpretFile,
+                                                  stdLibEnv)
 import           Parser                          (parse)
 import           Prelude                         hiding (lookup)
 import           TestHelper

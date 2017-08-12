@@ -270,15 +270,13 @@ callingComplexExpressionWhichEvaluatesToFunction = testCase
 
 callingAnAtomProducesError :: TestTree
 callingAnAtomProducesError = testCase
-  "\n Test 5.15 - Calling an atom is just not right. \n\
+  "\n Test 5.15 - Calling a non-function is wrong. \n\
   \ A function call to a non-function should produce a \n\
-  \ <DiyError NotAFunction> error" $ do
-
-    let expected = DiyError NotAFunction
+  \ <DiyError NotAFunction String> containing the function call" $
 
     mapM_ assertEvaluateWithoutEnvironment
-      [ (expected, parse "(#t 'foo 'bar)")
-      , (expected, parse "(42)"          )
+      [ (DiyError $ NotAFunction "DiyBool True", parse "(#t 'foo 'bar)")
+      , (DiyError $ NotAFunction "DiyInt 42", parse "(42)"          )
       ]
 
 
@@ -338,7 +336,7 @@ argumentsAreEvaluatedInCorrectEnvironment = testCase
     assertEvaluateWithEnvironment newEnv (expected, input)
 
 
--- One final test to see that recursive functions are working as expected.
+-- Checking that recursive functions are working as expected.
 -- This should already be working by now! :)
 
 
@@ -360,6 +358,30 @@ callingFunctionRecursively = testCase
     mapM_ (assertEvaluateWithEnvironment env)
       [ (DiyInt 42, parse "(my-fn 0)")
       , (DiyInt 42, parse "(my-fn 10)")
+      ]
+
+
+-- Checking that we can still call our special forms from inside
+-- a new function.
+-- If this test is failing, you should double check if you are correctly
+-- evaluating all the function arguments before buidling its environment.
+
+
+callingASpecialFormFromFunction :: TestTree
+callingASpecialFormFromFunction = testCase
+  "\n Test 5.21 - Calling a special form from a function. \n\
+  \ Previously created functions and special forms should be \n\
+  \ accessible from inside a new function" $ do
+
+    let defineCallingEmpty = parse "\n\
+    \(define calling-empty\n\
+    \        (lambda (x)\n\
+    \            (empty x)))"
+        (fn, env) = evaluate defineCallingEmpty $ Environment []
+
+    mapM_ (assertEvaluateWithEnvironment env)
+      [ (DiyBool True , parse "(calling-empty '()) ")
+      , (DiyBool False, parse "(calling-empty '(1))")
       ]
 
 
@@ -386,4 +408,5 @@ addingFunctionsToTheMixTests =
     , callingNothing
     , argumentsAreEvaluatedInCorrectEnvironment
     , callingFunctionRecursively
+    , callingASpecialFormFromFunction
     ]

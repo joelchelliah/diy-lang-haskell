@@ -1,8 +1,7 @@
 module Evaluator where
 
 import           Environment
-import           EvaluatorSolution
-import           Prelude           hiding (lookup)
+import           Prelude     hiding (lookup)
 import           Types
 
 
@@ -19,8 +18,7 @@ import           Types
 -- the AST of the evaluated result along with the updated environment.
 evaluate :: DiyAST -> Environment -> (DiyAST, Environment)
 evaluate ast env =
-  --DiySymbol "Implement this function!"
-  evaluate' ast env
+  (DiySymbol "Implement this function!", env)
 
 
 ----------------------------------------------------------------

@@ -5,7 +5,7 @@ import           Prelude     hiding (lookup)
 import           Types
 
 
--- Solutions for part 2 - 6:
+-- Solutions for parts 2 - 7:
 
 evaluate' :: DiyAST -> Environment -> (DiyAST, Environment)
 evaluate' ast env =
@@ -42,11 +42,11 @@ evaluate' ast env =
         evaluateList [DiySymbol "if", cond, e1, e2] = (ifElse cond e1 e2, env)
         evaluateList (DiySymbol "lambda" : _)       = (DiyError InvalidArgument, env)
         evaluateList (DiySymbol "define" : _)       = (DiyError InvalidArgument, env)
-        evaluateList (DiyClosure cFunc cEnv : args) = evaluateFunctionCall cFunc cEnv args
-        evaluateList list@(DiySymbol _ : _)         = evaluateListStartingWithSymbol list
+        evaluateList (cls@(DiyClosure _ _) : args)  = evaluateFunctionCall cls args env
+        evaluateList list@(DiySymbol _ : _)         = evaluateListStartingWithSymbol list env
         evaluateList list@(DiyList _ : _)           = evaluateListStartingWithList list
         evaluateList []                             = (DiyError EmptyFunctionCall, env)
-        evaluateList _                              = (DiyError NotAFunction, env)
+        evaluateList (other:_)                      = (DiyError $ NotAFunction (show other), env)
 
 
         -- Function evaluation :
@@ -54,30 +54,8 @@ evaluate' ast env =
         evaluateFunction (DiyFunction fArgs fBody) =
           evaluate' fBody
 
-        evaluateFunctionCall func@(DiyFunction fParams fBody) fEnv args =
-          if numArguments == numParameters
-          then evaluate' fBody extEnvWithArgs
-          else (DiyError functionArgError, fEnv)
-
-          where extEnvWithArgs    = foldr (flip extend) extendedEnv argBindings
-                extendedEnv       = foldr (flip extend) env fEnvBindings
-                fEnvBindings      = bindings fEnv
-                argBindings       = zip (val <$> fParams) (eval <$> args)
-                numParameters     = length fParams
-                numArguments      = length args
-                val (DiySymbol v) = v
-                functionArgError  = InvalidFunctionArguments { expected = numParameters
-                                                             , received = numArguments
-                                                             }
-
 
         -- Special list evaluations :
-
-        evaluateListStartingWithSymbol (DiySymbol key : rest) =
-          evaluate' exp env
-
-          where exp = DiyList $ val : rest
-                val = lookup env key
 
         evaluateListStartingWithList (DiyList list : rest) =
           evaluate' exp env
@@ -199,3 +177,30 @@ evaluate' ast env =
 
         isQuote (DiyList [DiySymbol "quote", _]) = True
         isQuote _                                = False
+
+
+evaluateListStartingWithSymbol :: [DiyAST] -> Environment -> (DiyAST, Environment)
+evaluateListStartingWithSymbol (DiySymbol key : rest) env =
+  evaluate' exp env
+
+  where exp = DiyList $ val : rest
+        val = lookup env key
+
+
+evaluateFunctionCall :: DiyAST -> [DiyAST] -> Environment -> (DiyAST, Environment)
+evaluateFunctionCall (DiyClosure func@(DiyFunction fParams fBody) fEnv) args env =
+  if numArguments == numParameters
+  then evaluate' fBody extEnvWithArgs
+  else (DiyError functionArgError, fEnv)
+
+  where extEnvWithArgs    = foldr (flip extend) extendedEnv argBindings
+        extendedEnv       = foldr (flip extend) env fEnvBindings
+        fEnvBindings      = bindings fEnv
+        argBindings       = zip (val <$> fParams) (eval <$> args)
+        numParameters     = length fParams
+        numArguments      = length args
+        val (DiySymbol v) = v
+        eval exp          = fst $ evaluate' exp env
+        functionArgError  = InvalidFunctionArguments { expected = numParameters
+                                                     , received = numArguments
+                                                     }

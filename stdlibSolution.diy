@@ -1,0 +1,31 @@
+;; Part 7 solutions:
+
+(define not
+  (lambda (b)
+    (if b #f #t)))
+
+(define or
+  (lambda (a b)
+    (if a #t b)))
+
+(define and
+  (lambda (a b)
+    (if a b #f)))
+
+(define xor
+  (lambda (a b)
+    (or (and (not a) b)
+        (and (not b) a))))
+
+(define >=
+  (lambda (a b)
+    (or (> a b)
+        (eq a b))))
+
+(define <=
+  (lambda (a b)
+    (not (> a b))))
+
+(define <
+  (lambda (a b)
+    (not (>= a b))))

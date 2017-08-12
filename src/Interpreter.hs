@@ -39,3 +39,8 @@ interpretFile fileName = do
       (ast', env')      = foldl' eval (DiyBool True, Environment []) parsedAsts
 
   return (unparse ast', env')
+
+-- Generate an environment containing all the functions
+-- in the standard library.
+stdLibEnv :: IO Environment
+stdLibEnv = snd <$> interpretFile "stdlib.diy"

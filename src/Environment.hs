@@ -1,6 +1,5 @@
 module Environment where
 
-import           EnvironmentSolution
 import           Types
 
 
@@ -16,16 +15,14 @@ import           Types
 -- is bound to the given `key`.
 lookup :: Environment -> String -> DiyAST
 lookup env key =
-  -- DiySymbol "Implement this function!"
-  lookup' env key
+  DiySymbol "Implement this function!"
 
 
 -- Extends the environment with an additional
 -- (key, value) binding.
 extend :: Environment -> (String, DiyAST) -> Environment
 extend env (key, val) =
-  -- Environment [("", DiySymbol "Implement this function!")]
-  extend' env (key, val)
+  Environment [("", DiySymbol "Implement this function!")]
 
 
 ----------------------------------------------------------------
