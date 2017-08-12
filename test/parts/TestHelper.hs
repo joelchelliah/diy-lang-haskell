@@ -2,13 +2,12 @@ module TestHelper where
 
 import           Test.Tasty
 import           Test.Tasty.HUnit
-import           Test.Tasty.Ingredients.FailFast
 
-import           Environment                     (extend, lookup)
-import           Evaluator                       (evaluate)
-import           Interpreter                     (interpret, interpretFile)
-import           Parser                          (parse)
-import           Prelude                         hiding (lookup)
+import           Environment      (extend, lookup)
+import           Evaluator        (evaluate)
+import           Interpreter      (interpret, interpretFile)
+import           Parser           (parse)
+import           Prelude          hiding (lookup)
 import           Types
 
 --

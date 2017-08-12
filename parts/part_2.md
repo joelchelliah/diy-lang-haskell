@@ -14,10 +14,10 @@ evaluate :: DiyAST -> String -> DiyAST
 
 ## Make it happen!
 
-The following command runs the tests. You know the drill.
+The following command runs the tests for part 2. You know the drill!
 
 ```bash
-stack test
+stack test diy-lang-haskell:test-2
 ```
 
 <!--

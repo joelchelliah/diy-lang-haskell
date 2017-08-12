@@ -12,7 +12,7 @@ We will start by implementing the `Environment` type, which can be found in `src
 Run the tests, and get cracking.
 
 ```bash
-stack test
+stack test diy-lang-haskell:test-4
 ```
 
 ## What's next?

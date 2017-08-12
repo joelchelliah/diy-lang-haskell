@@ -16,7 +16,7 @@ Finally, we look at handling situations where function calls are performed incor
 This is probably the most difficult part of making the language, so don't worry if it takes a bit longer than the previous parts.
 
 ```bash
-stack test
+stack test diy-lang-haskell:test-5
 ```
 
 ## What's next?

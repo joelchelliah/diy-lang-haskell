@@ -9,7 +9,7 @@ For our language, an `if` statement will suffice. The `if` takes three arguments
 Go on, you know what to do.
 
 ```bash
-stack test
+stack test diy-lang-haskell:test-3
 ```
 <!--
 ## Play while you work

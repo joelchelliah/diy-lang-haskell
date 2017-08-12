@@ -15,7 +15,7 @@ Any proper language needs good data structures, and **lists** are one of them. T
 Go on then, finish your language.
 
 ```bash
-stack test
+stack test diy-lang-haskell:test-6
 ```
 
 ## What's next?

@@ -2,11 +2,10 @@ module Test_3_EvaluatingComplexExpressions where
 
 import           Test.Tasty
 import           Test.Tasty.HUnit
-import           Test.Tasty.Ingredients.FailFast
 
 import           Environment
-import           Evaluator                       (evaluate)
-import           Parser                          (parse)
+import           Evaluator        (evaluate)
+import           Parser           (parse)
 import           TestHelper
 import           Types
 

@@ -38,10 +38,11 @@ executable diy-lang-haskell-exe
                      , diy-lang-haskell
   default-language:    Haskell2010
 
-test-suite diy-lang-haskell-test
+test-suite test-all
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
-  main-is:             Test.hs
+                     , test/parts
+  main-is:             Test_all.hs
   other-modules:       Test_1_Parser
                      , Test_2_EvaluatingSimpleExpressions
                      , Test_3_EvaluatingComplexExpressions
@@ -53,7 +54,104 @@ test-suite diy-lang-haskell-test
   build-depends:       base
                      , tasty >= 0.11
                      , tasty-hunit
-                     , tasty-fail-fast
+                     , diy-lang-haskell
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+test-suite test-1
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+                     , test/parts
+  main-is:             Test_only_1.hs
+  other-modules:       Test_1_Parser
+                     , TestHelper
+  build-depends:       base
+                     , tasty >= 0.11
+                     , tasty-hunit
+                     , diy-lang-haskell
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+test-suite test-2
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+                     , test/parts
+  main-is:             Test_only_2.hs
+  other-modules:       Test_2_EvaluatingSimpleExpressions
+                     , TestHelper
+  build-depends:       base
+                     , tasty >= 0.11
+                     , tasty-hunit
+                     , diy-lang-haskell
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+test-suite test-3
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+                     , test/parts
+  main-is:             Test_only_3.hs
+  other-modules:       Test_3_EvaluatingComplexExpressions
+                     , TestHelper
+  build-depends:       base
+                     , tasty >= 0.11
+                     , tasty-hunit
+                     , diy-lang-haskell
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+test-suite test-4
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+                     , test/parts
+  main-is:             Test_only_4.hs
+  other-modules:       Test_4_WorkingWithVariables
+                     , TestHelper
+  build-depends:       base
+                     , tasty >= 0.11
+                     , tasty-hunit
+                     , diy-lang-haskell
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+test-suite test-5
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+                     , test/parts
+  main-is:             Test_only_5.hs
+  other-modules:       Test_5_AddingFunctionsToTheMix
+                     , TestHelper
+  build-depends:       base
+                     , tasty >= 0.11
+                     , tasty-hunit
+                     , diy-lang-haskell
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+test-suite test-6
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+                     , test/parts
+  main-is:             Test_only_6.hs
+  other-modules:       Test_6_WorkingWithLists
+                     , TestHelper
+  build-depends:       base
+                     , tasty >= 0.11
+                     , tasty-hunit
+                     , diy-lang-haskell
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+test-suite test-7
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+                     , test/parts
+  main-is:             Test_only_7.hs
+  other-modules:       Test_7_UsingTheLanguage
+                     , TestHelper
+  build-depends:       base
+                     , tasty >= 0.11
+                     , tasty-hunit
                      , diy-lang-haskell
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010

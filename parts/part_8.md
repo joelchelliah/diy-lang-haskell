@@ -18,8 +18,10 @@ At this point the language is yours, and if you want something completely differ
 
 Have fun!
 
+Are all of your tests still green?
+
 ```bash
-stack test
+stack test diy-lang-haskell:test-all
 ```
 
 ## What's next?

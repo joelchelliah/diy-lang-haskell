@@ -108,10 +108,13 @@ The parsing is done in `Parser.hs`. Here, you will be implementing the following
 parse :: String -> DiyAST
 ```
 A lot of the gritty work of counting parentheses and such has already been done for you in `ParserUtil.hs`, but you must still stitch everything together.
-
+”
 - Have a look at the provided functions in `util/ParserUtil.hs` before you start. These should prove useful.
 
-- Run the tests with the following command: `stack test`, and hack away until the all the tests are passing.
+- Run the tests with the following command, and hack away until the all the tests are passing:
+```bash
+stack test diy-lang-haskell:test-1
+```
 
 - Each test has a description, which you should probably read it if you get stuck.
 

@@ -2,14 +2,12 @@ module Test_7_UsingTheLanguage where
 
 import           Test.Tasty
 import           Test.Tasty.HUnit
-import           Test.Tasty.Ingredients.FailFast
 
-import           Environment                     (extend, lookup)
-import           Evaluator                       (evaluate)
-import           Interpreter                     (interpret, interpretFile,
-                                                  stdLibEnv)
-import           Parser                          (parse)
-import           Prelude                         hiding (lookup)
+import           Environment      (extend, lookup)
+import           Evaluator        (evaluate)
+import           Interpreter      (interpret, interpretFile, stdLibEnv)
+import           Parser           (parse)
+import           Prelude          hiding (lookup)
 import           TestHelper
 import           Types
 

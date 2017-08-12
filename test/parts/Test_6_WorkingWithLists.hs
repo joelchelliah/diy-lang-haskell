@@ -2,12 +2,11 @@ module Test_6_WorkingWithLists where
 
 import           Test.Tasty
 import           Test.Tasty.HUnit
-import           Test.Tasty.Ingredients.FailFast
 
-import           Environment                     (extend, lookup)
-import           Evaluator                       (evaluate)
-import           Parser                          (parse)
-import           Prelude                         hiding (lookup)
+import           Environment      (extend, lookup)
+import           Evaluator        (evaluate)
+import           Parser           (parse)
+import           Prelude          hiding (lookup)
 import           TestHelper
 import           Types
 

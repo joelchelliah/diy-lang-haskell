@@ -14,7 +14,7 @@ For this part, you should consider the provided tests more like suggestions rath
 Good luck!
 
 ```bash
-stack test
+stack test diy-lang-haskell:test-7
 ```
 
 ## What's next?

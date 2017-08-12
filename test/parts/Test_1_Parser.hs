@@ -2,10 +2,9 @@ module Test_1_Parser where
 
 import           Test.Tasty
 import           Test.Tasty.HUnit
-import           Test.Tasty.Ingredients.FailFast
 
-import           InterpreterUtil                 (unparse)
-import           Parser                          (parse)
+import           InterpreterUtil  (unparse)
+import           Parser           (parse)
 import           TestHelper
 import           Types
 
