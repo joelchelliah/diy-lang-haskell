@@ -2,7 +2,7 @@
 
 > `batteriesIncluded :: Maybe[Bool]`
 
-This is a **(WIP)** Haskell port of Kjetil Valle's [diy lang tutorial/workshop](https://github.com/kvalle/diy-lang) which guides you through implementing your very own programming language, from scratch!
+This is a Haskell port of Kjetil Valle's [diy lang tutorial/workshop](https://github.com/kvalle/diy-lang), which guides you through implementing your very own programming language, from scratch!
 
 
 By the end of this tutorial you will be the proud author of a programming language, and will hopefully better understand how programming languages work  on a fundamental level.
